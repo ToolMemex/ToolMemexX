@@ -74,7 +74,7 @@ const MemePreview: React.FC<MemePreviewProps> = ({
   };
   
   const viewMeme = () => {
-    if (!memeState.uploadedImage || !memeState.selectedCaption) return;
+    if (!memeState.uploadedImage || (!memeState.selectedCaption && !memeState.useCustomCaption)) return;
     
     console.log('Preparing meme preview');
     
@@ -97,9 +97,25 @@ const MemePreview: React.FC<MemePreviewProps> = ({
       // Draw image
       ctx.drawImage(img, 0, 0);
       
+      // Determine caption position and background
+      let bgY = 0;
+      let textY = 0;
+      
+      // Position is based on user's selection
+      if (memeState.captionPosition === 'top') {
+        bgY = 0;
+        textY = 40;
+      } else if (memeState.captionPosition === 'center') {
+        bgY = (canvas.height / 2) - 40;
+        textY = canvas.height / 2;
+      } else { // bottom (default)
+        bgY = canvas.height - 80;
+        textY = canvas.height - 40;
+      }
+      
       // Draw caption background
       ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
+      ctx.fillRect(0, bgY, canvas.width, 80);
       
       // Get color based on selection
       let textColor = '#FFFFFF'; // Default white
@@ -115,12 +131,14 @@ const MemePreview: React.FC<MemePreviewProps> = ({
       // Set text color
       ctx.fillStyle = textColor;
       
-      // Get font based on selection
-      let fontFamily = '28px Arial, sans-serif'; // Default
+      // Get font type based on selection
+      let fontFamily;
       if (memeState.captionFont === 'impact') {
-        fontFamily = 'bold 28px Impact, sans-serif';
+        fontFamily = `bold ${memeState.captionSize}px Impact, sans-serif`;
       } else if (memeState.captionFont === 'comic') {
-        fontFamily = '28px Comic Sans MS, cursive';
+        fontFamily = `${memeState.captionSize}px Comic Sans MS, cursive`;
+      } else {
+        fontFamily = `${memeState.captionSize}px Arial, sans-serif`;
       }
       
       // Set font
@@ -128,8 +146,43 @@ const MemePreview: React.FC<MemePreviewProps> = ({
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
+      // Determine which caption to use - custom or selected
+      const captionText = memeState.useCustomCaption && memeState.customCaption 
+        ? memeState.customCaption 
+        : memeState.selectedCaption;
+      
       // Draw the caption
-      ctx.fillText(`"${memeState.selectedCaption}"`, canvas.width / 2, canvas.height - 40, canvas.width - 20);
+      if (captionText) {
+        // If caption is too long, wrap it
+        if (captionText.length > 60) {
+          // Split into multiple lines for long captions
+          const words = captionText.split(' ');
+          let line = '';
+          const lines = [];
+          const maxWidth = canvas.width - 40;
+          
+          for (let i = 0; i < words.length; i++) {
+            const testLine = line + words[i] + ' ';
+            const metrics = ctx.measureText(testLine);
+            if (metrics.width > maxWidth && i > 0) {
+              lines.push(line);
+              line = words[i] + ' ';
+            } else {
+              line = testLine;
+            }
+          }
+          lines.push(line);
+          
+          // Draw each line
+          for (let i = 0; i < lines.length; i++) {
+            const yOffset = (i - (lines.length - 1) / 2) * memeState.captionSize * 1.2;
+            ctx.fillText(`${lines[i]}`, canvas.width / 2, textY + yOffset, maxWidth);
+          }
+        } else {
+          // Draw as a single line
+          ctx.fillText(`"${captionText}"`, canvas.width / 2, textY, canvas.width - 20);
+        }
+      }
       
       // Add a small watermark
       ctx.font = '12px Arial, sans-serif';
@@ -185,9 +238,72 @@ const MemePreview: React.FC<MemePreviewProps> = ({
     }
   };
   
+  const getPositionClass = () => {
+    switch(memeState.captionPosition) {
+      case 'top':
+        return 'top-0';
+      case 'center':
+        return 'top-1/2 transform -translate-y-1/2';
+      case 'bottom':
+      default:
+        return 'bottom-0';
+    }
+  };
+  
+  // Function to copy meme to clipboard
+  const copyMemeToClipboard = async () => {
+    if (!generatedMemeUrl) return;
+    
+    try {
+      // Create a temporary img element
+      const img = new Image();
+      img.src = generatedMemeUrl;
+      
+      // Wait for image to load
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
+      
+      // Create a canvas and draw the image
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) {
+        throw new Error('Failed to get canvas context');
+      }
+      
+      ctx.drawImage(img, 0, 0);
+      
+      // Convert canvas to blob and copy to clipboard
+      canvas.toBlob(async (blob) => {
+        if (blob) {
+          try {
+            // Use the Clipboard API
+            await navigator.clipboard.write([
+              new ClipboardItem({
+                [blob.type]: blob
+              })
+            ]);
+            
+            // Show a toast or alert
+            alert('Meme copied to clipboard!');
+          } catch (err) {
+            console.error('Failed to copy to clipboard', err);
+            alert('Failed to copy to clipboard. Try using Save Image or Screenshot instead.');
+          }
+        }
+      }, 'image/png');
+    } catch (error) {
+      console.error('Error copying meme to clipboard:', error);
+      alert('Failed to copy to clipboard. Try using Save Image or Screenshot instead.');
+    }
+  };
+  
   return (
     <>
-      {(!memeState.uploadedImage || !memeState.selectedCaption) ? (
+      {(!memeState.uploadedImage || (!memeState.selectedCaption && !memeState.useCustomCaption)) ? (
         <div className="flex flex-col items-center justify-center py-10">
           <div className="w-24 h-24 rounded-full glass flex items-center justify-center mb-4 animate-float">
             <ImageIcon className="h-10 w-10 text-[#00C6FF] opacity-70" />
@@ -204,9 +320,12 @@ const MemePreview: React.FC<MemePreviewProps> = ({
               src={memeState.uploadedImage}
               alt="Meme preview"
             />
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-[#0C0C14]/80 backdrop-blur-sm">
-              <p className={`text-lg text-center font-medium ${getFontClass()} ${getColorClass()}`}>
-                "{memeState.selectedCaption}"
+            <div className={`absolute ${getPositionClass()} left-0 right-0 p-4 bg-[#0C0C14]/80 backdrop-blur-sm`}>
+              <p 
+                className={`text-center font-medium ${getFontClass()} ${getColorClass()}`}
+                style={{ fontSize: `${memeState.captionSize}px` }}
+              >
+                "{memeState.useCustomCaption ? memeState.customCaption : memeState.selectedCaption}"
               </p>
             </div>
           </div>
@@ -237,8 +356,52 @@ const MemePreview: React.FC<MemePreviewProps> = ({
 
             
             <div className="glass rounded-lg p-4">
+              <h4 className="font-heading text-sm uppercase text-gray-400 mb-3">Custom Caption</h4>
+              
+              <div className="mb-4">
+                <div className="flex items-center mb-2">
+                  <input 
+                    type="checkbox" 
+                    id="useCustomCaption"
+                    className="rounded-sm mr-2 h-4 w-4 accent-[#00C6FF]" 
+                    checked={memeState.useCustomCaption}
+                    onChange={(e) => {
+                      // If switching to custom caption mode and no custom caption yet,
+                      // initialize with the selected caption
+                      if (e.target.checked && !memeState.customCaption && memeState.selectedCaption) {
+                        setMemeState({
+                          ...memeState,
+                          useCustomCaption: true,
+                          customCaption: memeState.selectedCaption
+                        });
+                      } else {
+                        setMemeState({
+                          ...memeState,
+                          useCustomCaption: e.target.checked
+                        });
+                      }
+                    }}
+                  />
+                  <Label htmlFor="useCustomCaption" className="text-sm text-white cursor-pointer">
+                    Edit Caption Manually
+                  </Label>
+                </div>
+                
+                {memeState.useCustomCaption && (
+                  <textarea
+                    className="w-full h-24 bg-[#0C0C14] border border-[rgba(255,255,255,0.2)] rounded-lg p-3 text-white resize-none focus:outline-none focus:ring-2 focus:ring-[#00C6FF]"
+                    placeholder="Enter your custom caption here..."
+                    value={memeState.customCaption || ''}
+                    onChange={(e) => setMemeState({
+                      ...memeState,
+                      customCaption: e.target.value
+                    })}
+                  ></textarea>
+                )}
+              </div>
+              
               <h4 className="font-heading text-sm uppercase text-gray-400 mb-2">Caption Styling</h4>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <Label className="block text-sm text-gray-400 mb-1">Font</Label>
                   <Select onValueChange={handleFontChange} value={memeState.captionFont}>
@@ -266,6 +429,47 @@ const MemePreview: React.FC<MemePreviewProps> = ({
                       <SelectItem value="pink">Pink</SelectItem>
                       <SelectItem value="purple">Purple</SelectItem>
                       <SelectItem value="orange">Orange</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="block text-sm text-gray-400 mb-1">Font Size: {memeState.captionSize}px</Label>
+                  <div className="flex items-center">
+                    <span className="text-xs mr-2">12</span>
+                    <input 
+                      type="range" 
+                      min="12" 
+                      max="36" 
+                      step="1"
+                      className="flex-1 accent-[#00C6FF]"
+                      value={memeState.captionSize}
+                      onChange={(e) => setMemeState({
+                        ...memeState,
+                        captionSize: parseInt(e.target.value)
+                      })}
+                    />
+                    <span className="text-xs ml-2">36</span>
+                  </div>
+                </div>
+                <div>
+                  <Label className="block text-sm text-gray-400 mb-1">Position</Label>
+                  <Select 
+                    onValueChange={(val) => setMemeState({
+                      ...memeState,
+                      captionPosition: val
+                    })} 
+                    value={memeState.captionPosition}
+                  >
+                    <SelectTrigger className="w-full bg-[#0C0C14] border border-[rgba(255,255,255,0.05)] rounded-lg">
+                      <SelectValue placeholder="Select position" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="top">Top</SelectItem>
+                      <SelectItem value="center">Center</SelectItem>
+                      <SelectItem value="bottom">Bottom</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -313,20 +517,32 @@ const MemePreview: React.FC<MemePreviewProps> = ({
                 </div>
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-3 w-full">
-                <a 
-                  href={generatedMemeUrl || '#'}
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-full"
-                >
+              <div className="flex flex-col gap-3 w-full">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Button 
-                    className="w-full bg-[#1E293B] hover:bg-[#334155] text-white h-full flex items-center justify-center"
+                    onClick={copyMemeToClipboard}
+                    className="w-full bg-[#2563EB] hover:bg-[#1E40AF] text-white flex items-center justify-center"
                   >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Open in New Tab
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copy to Clipboard
                   </Button>
-                </a>
+                
+                  <a 
+                    href={generatedMemeUrl || '#'}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-full"
+                  >
+                    <Button 
+                      className="w-full bg-[#1E293B] hover:bg-[#334155] text-white h-full flex items-center justify-center"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Open in New Tab
+                    </Button>
+                  </a>
+                </div>
                 
                 <Button 
                   variant="outline" 

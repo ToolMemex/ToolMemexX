@@ -12,9 +12,13 @@ import { Card } from "@/components/ui/card";
 export interface MemeState {
   uploadedImage: string | null;
   selectedCaption: string | null;
+  customCaption: string | null;   // For manually editing the caption
   captionStyle: string;
   captionFont: string;
   captionColor: string;
+  captionSize: number;           // Font size for the caption
+  captionPosition: string;       // Position of the caption (top, bottom, center)
+  useCustomCaption: boolean;     // Whether to use the custom caption or the selected one
 }
 
 const Home = () => {
@@ -22,9 +26,13 @@ const Home = () => {
   const [memeState, setMemeState] = useState<MemeState>({
     uploadedImage: null,
     selectedCaption: null,
+    customCaption: null,
     captionStyle: 'funny',
     captionFont: 'impact',
     captionColor: 'white',
+    captionSize: 24,
+    captionPosition: 'bottom',
+    useCustomCaption: false,
   });
 
   const [showFallbackMessage, setShowFallbackMessage] = useState(false);
