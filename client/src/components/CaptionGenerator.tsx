@@ -112,6 +112,12 @@ const CaptionGenerator: FC<CaptionGeneratorProps> = ({ memeState, setMemeState }
             >
               Dark Humor
             </button>
+            <button 
+              className={`px-3 py-1 rounded-full bg-[rgba(255,255,255,0.1)] text-sm border ${memeState.captionStyle === 'tech' ? 'border-[#00C6FF]' : 'border-[rgba(255,255,255,0.05)]'}`}
+              onClick={() => handleStyleChange('tech')}
+            >
+              Tech Jokes
+            </button>
           </div>
           
           {/* Captions list */}

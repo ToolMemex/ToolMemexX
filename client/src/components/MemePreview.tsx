@@ -160,6 +160,14 @@ const MemePreview: React.FC<MemePreviewProps> = ({
         return 'text-yellow-300';
       case 'neon':
         return 'text-[#00C6FF]';
+      case 'green':
+        return 'text-green-400';
+      case 'pink':
+        return 'text-pink-400';
+      case 'purple':
+        return 'text-purple-400';
+      case 'orange':
+        return 'text-orange-400';
       default:
         return 'text-white';
     }
@@ -318,6 +326,10 @@ const MemePreview: React.FC<MemePreviewProps> = ({
                       <SelectItem value="white">White</SelectItem>
                       <SelectItem value="yellow">Yellow</SelectItem>
                       <SelectItem value="neon">Neon Blue</SelectItem>
+                      <SelectItem value="green">Green</SelectItem>
+                      <SelectItem value="pink">Pink</SelectItem>
+                      <SelectItem value="purple">Purple</SelectItem>
+                      <SelectItem value="orange">Orange</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
