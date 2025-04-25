@@ -4,11 +4,13 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
+import DownloadPage from "@/pages/Download";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/download" component={DownloadPage} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
