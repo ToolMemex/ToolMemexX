@@ -8,6 +8,16 @@ import Footer from "@/components/Footer";
 import ProUpgradeModal from "@/components/ProUpgradeModal";
 import { Card } from "@/components/ui/card";
 
+// Style preset interface
+export interface StylePreset {
+  name: string;
+  font: string;
+  color: string;
+  size: number;
+  position: string;
+  description: string;
+}
+
 // Main application state interface
 export interface MemeState {
   uploadedImage: string | null;
@@ -19,6 +29,13 @@ export interface MemeState {
   captionSize: number;           // Font size for the caption
   captionPosition: string;       // Position of the caption (top, bottom, center)
   useCustomCaption: boolean;     // Whether to use the custom caption or the selected one
+  darkMode: boolean;             // Dark mode toggle
+  savedMemes: Array<{            // Saved memes history
+    id: string;
+    imageUrl: string;
+    caption: string;
+    timestamp: number;
+  }>;
 }
 
 const Home = () => {
@@ -33,6 +50,8 @@ const Home = () => {
     captionSize: 24,
     captionPosition: 'bottom',
     useCustomCaption: false,
+    darkMode: true, // Default to dark mode
+    savedMemes: [] // Initialize with empty array
   });
 
   const [showFallbackMessage, setShowFallbackMessage] = useState(false);

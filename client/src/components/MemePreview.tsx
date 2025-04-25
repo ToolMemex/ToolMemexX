@@ -273,6 +273,61 @@ const MemePreview: React.FC<MemePreviewProps> = ({
     }
   };
   
+  // Function to copy the meme to clipboard
+  const copyToClipboard = async () => {
+    if (!generatedMemeUrl) return;
+    
+    try {
+      // Split the base64 string to get actual base64 data
+      const base64Data = generatedMemeUrl.split(',')[1];
+      
+      // Create a Blob from the base64 data
+      const blob = await fetch(generatedMemeUrl).then(res => res.blob());
+      
+      // Create a ClipboardItem
+      if (navigator.clipboard && navigator.clipboard.write) {
+        const clipboardItem = new ClipboardItem({
+          [blob.type]: blob
+        });
+        
+        // Write to clipboard
+        await navigator.clipboard.write([clipboardItem]);
+        alert('Meme copied to clipboard!');
+      } else {
+        // Fallback method - create an image and try to copy it
+        const img = document.createElement('img');
+        img.src = generatedMemeUrl;
+        img.style.position = 'fixed';
+        img.style.left = '-9999px';
+        document.body.appendChild(img);
+        
+        // Wait for image to load
+        await new Promise(resolve => {
+          img.onload = resolve;
+        });
+        
+        // Create a range and selection
+        const range = document.createRange();
+        range.selectNode(img);
+        const selection = window.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(range);
+          
+          // Try to copy
+          document.execCommand('copy');
+          selection.removeAllRanges();
+        }
+        document.body.removeChild(img);
+        
+        alert('Meme copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+      alert('Failed to copy to clipboard. Try using the download option instead.');
+    }
+  };
+  
   return (
     <>
       {(!memeState.uploadedImage || (!memeState.selectedCaption && !memeState.useCustomCaption)) ? (
@@ -501,6 +556,18 @@ const MemePreview: React.FC<MemePreviewProps> = ({
                     Download Meme
                   </Button>
                 
+                  <Button 
+                    onClick={copyToClipboard}
+                    className="w-full bg-[#9333EA] hover:bg-[#7E22CE] text-white flex items-center justify-center"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                    Copy to Clipboard
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-3">
                   <a 
                     href={generatedMemeUrl || '#'}
                     target="_blank" 
