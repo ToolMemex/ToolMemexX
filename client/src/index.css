@@ -1,0 +1,186 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Neue Machina';
+  src: url('https://cdn.fontshare.com/wf/XZSNQOKLERWH5NUBEVBJ72GSTUIOWQKG/QMZPZOZTQPFZBVFYIVHE5L74VKWYLXBQ/JIBDDHPFGOPRRQ5SF6QKDLQE56QILCZS.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('https://cdn.fontshare.com/wf/SQLHN4UWFKGEZ3UMBPUYLGBR56LPLF3K/JEW7WFLDPEZWFUEP6IHWAQ46JZKRM3SZ/MWMYN3ZKPTZ62FKYBX36UBOPATOWC355.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --background: 240 10% 6%;
+    --foreground: 0 0% 100%;
+    
+    --card: 240 19% 9%;
+    --card-foreground: 0 0% 100%;
+    
+    --popover: 240 10% 6%;
+    --popover-foreground: 0 0% 100%;
+    
+    --primary: 196 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 240 19% 9%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --muted: 240 10% 16%;
+    --muted-foreground: 240 5% 65%;
+    
+    --accent: 240 10% 16%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 240 10% 16%;
+    --input: 240 10% 16%;
+    --ring: 196 100% 50%;
+    
+    --radius: 0.75rem;
+
+    /* Sidebar colors - keeping them consistent with the theme */
+    --sidebar-background: 240 10% 6%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 196 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 10% 16%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 240 10% 16%;
+    --sidebar-ring: 196 100% 50%;
+
+    /* Chart colors */
+    --chart-1: 196 100% 50%;
+    --chart-2: 262 92% 51%;
+    --chart-3: 205 100% 50%;
+    --chart-4: 280 100% 50%;
+    --chart-5: 217 100% 50%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    background-image: 
+      radial-gradient(circle at 20% 25%, rgba(110, 17, 244, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(0, 198, 255, 0.1) 0%, transparent 50%);
+    font-family: 'Satoshi', sans-serif;
+  }
+
+  h1, h2, h3, h4, .font-heading {
+    font-family: 'Neue Machina', sans-serif;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-opacity-60 backdrop-blur-md border border-[rgba(255,255,255,0.05)] shadow-xl;
+    background-color: rgba(16, 16, 28, 0.6);
+  }
+
+  .neon-border {
+    @apply relative;
+  }
+
+  .neon-border::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(45deg, hsl(var(--primary)), hsl(205 100% 50%), hsl(262 92% 51%));
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.7;
+    z-index: -1;
+  }
+
+  .btn-glow {
+    @apply bg-gradient-to-r from-[#00C6FF] to-[#0072FF] bg-[length:200%_auto] transition-all;
+    animation: gradient 5s ease infinite;
+  }
+
+  .btn-glow:hover {
+    @apply bg-[position:right_center] shadow-[0_0_15px_rgba(0,198,255,0.8),0_0_30px_rgba(0,114,255,0.4)];
+  }
+
+  .upload-zone {
+    @apply transition-all duration-300;
+  }
+
+  .upload-zone:hover {
+    @apply shadow-[0_0_20px_rgba(0,198,255,0.3)];
+  }
+
+  @keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes pulse-blue {
+    0%, 100% { 
+      box-shadow: 0 0 12px rgba(0, 198, 255, 0.7), 0 0 24px rgba(0, 198, 255, 0.3);
+    }
+    50% { 
+      box-shadow: 0 0 20px rgba(0, 198, 255, 0.9), 0 0 30px rgba(0, 198, 255, 0.5);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .animate-pulse-blue {
+    animation: pulse-blue 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .icon-pulse {
+    animation: icon-pulse 2s infinite;
+  }
+
+  @keyframes icon-pulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(16, 16, 28, 0.6);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #00C6FF, #0072FF);
+    border-radius: 4px;
+  }
+}
