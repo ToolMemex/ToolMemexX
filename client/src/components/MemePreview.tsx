@@ -361,13 +361,19 @@ const MemePreview: React.FC<MemePreviewProps> = ({
               
               <div className="flex flex-col gap-3 w-full">
                 <div className="flex gap-3">
-                  <Button 
-                    onClick={() => window.open(generatedMemeUrl, '_blank')}
-                    className="flex-1 bg-[#1E293B] hover:bg-[#334155] text-white"
+                  <a 
+                    href={generatedMemeUrl || '#'}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex-1"
                   >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Open in New Tab
-                  </Button>
+                    <Button 
+                      className="w-full bg-[#1E293B] hover:bg-[#334155] text-white"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Open in New Tab
+                    </Button>
+                  </a>
                 </div>
                 
                 <div className="flex gap-3">
@@ -379,13 +385,18 @@ const MemePreview: React.FC<MemePreviewProps> = ({
                     Return to Editor
                   </Button>
                   
-                  <Button 
-                    className="flex-1 btn-glow"
-                    onClick={handleDownloadButtonClick}
+                  <a 
+                    href={generatedMemeUrl || '#'}
+                    download="ToolMemeX-creation.png"
+                    className="flex-1"
                   >
-                    <DownloadIcon className="h-4 w-4 mr-2" />
-                    Download Image
-                  </Button>
+                    <Button 
+                      className="w-full btn-glow"
+                    >
+                      <DownloadIcon className="h-4 w-4 mr-2" />
+                      Download Image
+                    </Button>
+                  </a>
                 </div>
               </div>
             </div>
