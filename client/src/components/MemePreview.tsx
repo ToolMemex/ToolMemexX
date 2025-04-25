@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -22,6 +23,7 @@ const MemePreview: React.FC<MemePreviewProps> = ({
   const [generatedMemeUrl, setGeneratedMemeUrl] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const workerRef = useRef<Worker | null>(null);
+  const [, setLocation] = useLocation();
   
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -123,8 +125,10 @@ const MemePreview: React.FC<MemePreviewProps> = ({
       // Get the final image data
       const imageDataUrl = canvas.toDataURL('image/png');
       
-      // Store the image URL and open dialog
+      // Store the image URL, save to localStorage and open dialog
       if (imageDataUrl) {
+        // Save to localStorage for the dedicated page to access
+        localStorage.setItem('currentMeme', imageDataUrl);
         setGeneratedMemeUrl(imageDataUrl);
         setDialogOpen(true);
       }
@@ -361,6 +365,19 @@ const MemePreview: React.FC<MemePreviewProps> = ({
               
               <div className="flex flex-col gap-3 w-full">
                 <div className="flex gap-3">
+                  <Button 
+                    onClick={() => {
+                      setDialogOpen(false);
+                      setLocation('/memeview');
+                    }}
+                    className="w-full btn-glow py-2"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Open Fullscreen Save Page
+                  </Button>
+                </div>
+                
+                <div className="flex gap-3">
                   <a 
                     href={generatedMemeUrl || '#'}
                     target="_blank" 
@@ -374,16 +391,6 @@ const MemePreview: React.FC<MemePreviewProps> = ({
                       Open in New Tab
                     </Button>
                   </a>
-                </div>
-                
-                <div className="flex gap-3">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setDialogOpen(false)}
-                    className="flex-1 bg-transparent"
-                  >
-                    Return to Editor
-                  </Button>
                   
                   <a 
                     href={generatedMemeUrl || '#'}
@@ -391,13 +398,21 @@ const MemePreview: React.FC<MemePreviewProps> = ({
                     className="flex-1"
                   >
                     <Button 
-                      className="w-full btn-glow"
+                      className="w-full bg-[#1E293B] hover:bg-[#334155] text-white"
                     >
                       <DownloadIcon className="h-4 w-4 mr-2" />
-                      Download Image
+                      Try Direct Download
                     </Button>
                   </a>
                 </div>
+                
+                <Button 
+                  variant="outline" 
+                  onClick={() => setDialogOpen(false)}
+                  className="w-full bg-transparent"
+                >
+                  Return to Editor
+                </Button>
               </div>
             </div>
           )}
