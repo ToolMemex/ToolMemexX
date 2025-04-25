@@ -250,54 +250,26 @@ const MemePreview: React.FC<MemePreviewProps> = ({
     }
   };
   
-  // Function to copy meme to clipboard
-  const copyMemeToClipboard = async () => {
+  // Function to download the meme directly
+  const downloadMeme = () => {
     if (!generatedMemeUrl) return;
     
     try {
-      // Create a temporary img element
-      const img = new Image();
-      img.src = generatedMemeUrl;
+      // Create a download link
+      const link = document.createElement('a');
+      link.href = generatedMemeUrl;
+      link.download = 'toolmemex-meme.png';
       
-      // Wait for image to load
-      await new Promise((resolve) => {
-        img.onload = resolve;
-      });
+      // Append to the body, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       
-      // Create a canvas and draw the image
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      
-      if (!ctx) {
-        throw new Error('Failed to get canvas context');
-      }
-      
-      ctx.drawImage(img, 0, 0);
-      
-      // Convert canvas to blob and copy to clipboard
-      canvas.toBlob(async (blob) => {
-        if (blob) {
-          try {
-            // Use the Clipboard API
-            await navigator.clipboard.write([
-              new ClipboardItem({
-                [blob.type]: blob
-              })
-            ]);
-            
-            // Show a toast or alert
-            alert('Meme copied to clipboard!');
-          } catch (err) {
-            console.error('Failed to copy to clipboard', err);
-            alert('Failed to copy to clipboard. Try using Save Image or Screenshot instead.');
-          }
-        }
-      }, 'image/png');
+      // Inform user
+      alert('Download started!');
     } catch (error) {
-      console.error('Error copying meme to clipboard:', error);
-      alert('Failed to copy to clipboard. Try using Save Image or Screenshot instead.');
+      console.error('Error downloading meme:', error);
+      alert('Download failed. Try right-clicking the image and selecting "Save Image As..." instead.');
     }
   };
   
@@ -485,7 +457,7 @@ const MemePreview: React.FC<MemePreviewProps> = ({
           <DialogHeader>
             <DialogTitle className="text-xl font-heading text-center mb-4 text-[#00C6FF]">Your Meme Is Ready!</DialogTitle>
             <DialogDescription className="text-center text-gray-400">
-              Right-click on the image to save it to your device or take a screenshot
+              Click the Download button or use one of the options below
             </DialogDescription>
           </DialogHeader>
           
@@ -520,13 +492,13 @@ const MemePreview: React.FC<MemePreviewProps> = ({
               <div className="flex flex-col gap-3 w-full">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Button 
-                    onClick={copyMemeToClipboard}
+                    onClick={downloadMeme}
                     className="w-full bg-[#2563EB] hover:bg-[#1E40AF] text-white flex items-center justify-center"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    Copy to Clipboard
+                    Download Meme
                   </Button>
                 
                   <a 

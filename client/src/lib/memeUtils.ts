@@ -54,6 +54,16 @@ export function generateCaptions(style: string): string[] {
       "POV: You're explaining NFTs to your grandparents.",
       "My face when I realize I've been hired to maintain a codebase written entirely in COBOL.",
       "When the AI generates better code than you do."
+    ],
+    techjokes: [
+      "Why do programmers prefer dark mode? Because light attracts bugs.",
+      "Eight bytes walk into a bar, the bartender asks 'What can I get you?' One of them says, 'Make us a double.'",
+      "A SQL query walks into a bar, walks up to two tables, and asks, 'May I join you?'",
+      "Why was the JavaScript developer sad? Because they didn't Node how to Express themselves.",
+      "Why did the developer go broke? Because they used up all their cache.",
+      "Why don't programmers like nature? It has too many bugs and no debugging tool.",
+      "A programmer's wife tells him, 'Go to the store and get a gallon of milk. If they have eggs, get a dozen.' He returns with 12 gallons of milk.",
+      "There are 10 types of people in the world: those who understand binary, and those who don't."
     ]
   };
   
