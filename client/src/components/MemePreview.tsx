@@ -365,15 +365,11 @@ const MemePreview: React.FC<MemePreviewProps> = ({
               
               <div className="flex flex-col gap-3 w-full">
                 <div className="flex gap-3">
-                  <Button 
-                    onClick={() => {
-                      window.open('/savememe.html', '_blank');
-                    }}
-                    className="w-full btn-glow py-2"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Open Save Page
-                  </Button>
+                  <div className="w-full text-center p-3 bg-[#0f172a] rounded-lg">
+                    <p className="text-gray-300 text-sm">
+                      To save your meme, tap and hold (or right-click) on the image above and select "Download Image" or "Save Image"
+                    </p>
+                  </div>
                 </div>
                 
                 <div className="flex gap-3">
@@ -391,18 +387,44 @@ const MemePreview: React.FC<MemePreviewProps> = ({
                     </Button>
                   </a>
                   
-                  <a 
-                    href={generatedMemeUrl || '#'}
-                    download="ToolMemeX-creation.png"
-                    className="flex-1"
-                  >
+                  <div className="flex-1">
                     <Button 
                       className="w-full bg-[#1E293B] hover:bg-[#334155] text-white"
+                      onClick={async () => {
+                        if (!generatedMemeUrl) return;
+                        
+                        try {
+                          // Create a form to submit the image data
+                          const form = document.createElement('form');
+                          form.method = 'POST';
+                          form.action = '/api/download-meme';
+                          form.target = '_blank';
+                          
+                          // Add the image data as a hidden input
+                          const input = document.createElement('input');
+                          input.type = 'hidden';
+                          input.name = 'imageData';
+                          input.value = generatedMemeUrl;
+                          form.appendChild(input);
+                          
+                          // Add the form to the document and submit it
+                          document.body.appendChild(form);
+                          form.submit();
+                          
+                          // Remove the form after submission
+                          setTimeout(() => {
+                            document.body.removeChild(form);
+                          }, 100);
+                        } catch (error) {
+                          console.error('Error downloading image:', error);
+                          onFallbackMessage();
+                        }
+                      }}
                     >
                       <DownloadIcon className="h-4 w-4 mr-2" />
-                      Try Direct Download
+                      Download via Server
                     </Button>
-                  </a>
+                  </div>
                 </div>
                 
                 <Button 
