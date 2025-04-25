@@ -394,27 +394,22 @@ const MemePreview: React.FC<MemePreviewProps> = ({
                         if (!generatedMemeUrl) return;
                         
                         try {
-                          // Create a form to submit the image data
-                          const form = document.createElement('form');
-                          form.method = 'POST';
-                          form.action = '/api/download-meme';
-                          form.target = '_blank';
+                          // Create a blob from the image data
+                          const response = await fetch(generatedMemeUrl);
+                          const blob = await response.blob();
                           
-                          // Add the image data as a hidden input
-                          const input = document.createElement('input');
-                          input.type = 'hidden';
-                          input.name = 'imageData';
-                          input.value = generatedMemeUrl;
-                          form.appendChild(input);
+                          // Create a download link
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.style.display = 'none';
+                          a.href = url;
+                          a.download = 'ToolMemeX-creation.png';
                           
-                          // Add the form to the document and submit it
-                          document.body.appendChild(form);
-                          form.submit();
-                          
-                          // Remove the form after submission
-                          setTimeout(() => {
-                            document.body.removeChild(form);
-                          }, 100);
+                          // Add to document, click, and clean up
+                          document.body.appendChild(a);
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                          document.body.removeChild(a);
                         } catch (error) {
                           console.error('Error downloading image:', error);
                           onFallbackMessage();
@@ -422,7 +417,7 @@ const MemePreview: React.FC<MemePreviewProps> = ({
                       }}
                     >
                       <DownloadIcon className="h-4 w-4 mr-2" />
-                      Download via Server
+                      Download Image
                     </Button>
                   </div>
                 </div>
