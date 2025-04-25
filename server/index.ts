@@ -37,34 +37,63 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  try {
+    const server = await registerRoutes(app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
-  });
+      res.status(status).json({ message });
+      console.error('Error middleware triggered:', err);
+      // Don't throw the error here as it will crash the server
+    });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
+    // importantly only setup vite in development and after
+    // setting up all the other routes so the catch-all route
+    // doesn't interfere with the other routes
+    if (app.get("env") === "development") {
+      await setupVite(app, server);
+    } else {
+      serveStatic(app);
+    }
+
+    // ALWAYS serve the app on port 5000
+    // this serves both the API and the client.
+    // It is the only port that is not firewalled.
+    const port = process.env.PORT || 5000;
+    const host = "0.0.0.0";
+    
+    // Try to listen on the port, with retries if it fails
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    const startServer = () => {
+      server.listen({
+        port,
+        host,
+        reusePort: true,
+      }, () => {
+        log(`serving on port ${port}`);
+        console.log(`Server successfully started on ${host}:${port}`);
+      }).on('error', (err: any) => {
+        if (err.code === 'EADDRINUSE' && retryCount < maxRetries) {
+          console.log(`Port ${port} is busy, retrying in 1 second...`);
+          retryCount++;
+          setTimeout(startServer, 1000);
+        } else {
+          console.error('Failed to start server:', err);
+        }
+      });
+    };
+    
+    startServer();
+    
+    // Handle server errors to prevent crashes
+    server.on('error', (error) => {
+      console.error('Server error:', error);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
   }
-
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
 })();
