@@ -387,39 +387,18 @@ const MemePreview: React.FC<MemePreviewProps> = ({
                     </Button>
                   </a>
                   
-                  <div className="flex-1">
+                  <a 
+                    href={generatedMemeUrl || '#'}
+                    download="ToolMemeX-creation.png"
+                    className="flex-1"
+                  >
                     <Button 
                       className="w-full bg-[#1E293B] hover:bg-[#334155] text-white"
-                      onClick={async () => {
-                        if (!generatedMemeUrl) return;
-                        
-                        try {
-                          // Create a blob from the image data
-                          const response = await fetch(generatedMemeUrl);
-                          const blob = await response.blob();
-                          
-                          // Create a download link
-                          const url = window.URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.style.display = 'none';
-                          a.href = url;
-                          a.download = 'ToolMemeX-creation.png';
-                          
-                          // Add to document, click, and clean up
-                          document.body.appendChild(a);
-                          a.click();
-                          window.URL.revokeObjectURL(url);
-                          document.body.removeChild(a);
-                        } catch (error) {
-                          console.error('Error downloading image:', error);
-                          onFallbackMessage();
-                        }
-                      }}
                     >
                       <DownloadIcon className="h-4 w-4 mr-2" />
                       Download Image
                     </Button>
-                  </div>
+                  </a>
                 </div>
                 
                 <Button 
