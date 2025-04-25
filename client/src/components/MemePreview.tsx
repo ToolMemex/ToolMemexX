@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ImageIcon, DownloadIcon, ShareIcon, ExternalLink } from 'lucide-react';
 import { MemeState } from '../pages/Home';
 
@@ -19,6 +20,7 @@ const MemePreview: React.FC<MemePreviewProps> = ({
   onFallbackMessage 
 }) => {
   const [generatedMemeUrl, setGeneratedMemeUrl] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const workerRef = useRef<Worker | null>(null);
   
   useEffect(() => {
@@ -118,78 +120,10 @@ const MemePreview: React.FC<MemePreviewProps> = ({
       // Get the final image data
       const imageDataUrl = canvas.toDataURL('image/png');
       
-      // Store the image URL for direct opening
+      // Store the image URL and open dialog
       if (imageDataUrl) {
         setGeneratedMemeUrl(imageDataUrl);
-      }
-      
-      // Open in new window for direct viewing/saving
-      const newWindow = window.open('');
-      if (newWindow) {
-        newWindow.document.write(`
-          <html>
-            <head>
-              <title>Your ToolMemeX Meme - Right-click to Save</title>
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <style>
-                body { 
-                  font-family: system-ui, -apple-system, sans-serif;
-                  text-align: center;
-                  padding: 20px;
-                  background-color: #0C0C14;
-                  color: #fff;
-                  max-width: 800px;
-                  margin: 0 auto;
-                }
-                img {
-                  max-width: 100%;
-                  border-radius: 8px;
-                  margin-bottom: 20px;
-                  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-                }
-                .instruction {
-                  background: rgba(255,255,255,0.1);
-                  padding: 15px;
-                  border-radius: 8px;
-                  margin-bottom: 20px;
-                  font-size: 16px;
-                  line-height: 1.5;
-                }
-                h2 {
-                  color: #00C6FF;
-                  margin-bottom: 20px;
-                }
-                button {
-                  background: #2563EB;
-                  color: white;
-                  border: none;
-                  padding: 10px 20px;
-                  border-radius: 8px;
-                  cursor: pointer;
-                  font-size: 16px;
-                  font-weight: bold;
-                  margin-top: 20px;
-                }
-                button:hover {
-                  background: #1D4ED8;
-                }
-              </style>
-            </head>
-            <body>
-              <h2>Your ToolMemeX Creation</h2>
-              <img src="${imageDataUrl}" alt="Your meme">
-              <div class="instruction">
-                <strong>To save your meme:</strong><br>
-                Right-click (or press and hold on mobile) on the image and select "Save Image As..."
-              </div>
-              <button onclick="window.close()">Return to Meme Generator</button>
-            </body>
-          </html>
-        `);
-        newWindow.document.close();
-      } else {
-        // Fallback for popup blockers
-        alert('Please allow popups to open your meme for downloading.');
+        setDialogOpen(true);
       }
     };
     
@@ -315,6 +249,59 @@ const MemePreview: React.FC<MemePreviewProps> = ({
           </div>
         </div>
       )}
+      
+      {/* Dialog that shows when saving meme */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-[600px] bg-[#0C0C14] border border-gray-800">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-heading text-center mb-4 text-[#00C6FF]">Your Meme Is Ready!</DialogTitle>
+          </DialogHeader>
+          
+          {generatedMemeUrl && (
+            <div className="flex flex-col items-center">
+              <div className="rounded-lg overflow-hidden mb-6 w-full max-w-lg mx-auto">
+                <img 
+                  src={generatedMemeUrl} 
+                  alt="Your generated meme" 
+                  className="w-full h-auto"
+                />
+              </div>
+              
+              <div className="bg-[rgba(255,255,255,0.1)] p-4 rounded-lg mb-6 text-center">
+                <p className="mb-2 font-medium">To save your meme:</p>
+                <p className="text-sm text-gray-300">Right-click (or press and hold) on the image above and select "Save Image As..."</p>
+              </div>
+              
+              <div className="flex gap-4 w-full">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setDialogOpen(false)}
+                  className="flex-1 bg-transparent"
+                >
+                  Return to Editor
+                </Button>
+                
+                <Button 
+                  className="flex-1 btn-glow"
+                  onClick={() => {
+                    if (generatedMemeUrl) {
+                      const link = document.createElement('a');
+                      link.href = generatedMemeUrl;
+                      link.download = 'ToolMemeX-creation.png';
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }
+                  }}
+                >
+                  <DownloadIcon className="h-4 w-4 mr-2" />
+                  Try Direct Download
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
