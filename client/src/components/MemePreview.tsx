@@ -367,13 +367,12 @@ const MemePreview: React.FC<MemePreviewProps> = ({
                 <div className="flex gap-3">
                   <Button 
                     onClick={() => {
-                      setDialogOpen(false);
-                      setLocation('/memeview');
+                      window.open('/savememe.html', '_blank');
                     }}
                     className="w-full btn-glow py-2"
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
-                    Open Fullscreen Save Page
+                    Open Save Page
                   </Button>
                 </div>
                 

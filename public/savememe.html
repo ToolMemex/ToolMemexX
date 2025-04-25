@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Save Your Meme - ToolMemeX</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #0C0C14;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .title {
+      color: #00C6FF;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #A0AEC0;
+      font-size: 16px;
+    }
+    .image-container {
+      margin: 20px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+    .instructions {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .button {
+      display: inline-block;
+      background-color: #2563EB;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin: 10px;
+    }
+    .button:hover {
+      background-color: #1D4ED8;
+    }
+    .button.outline {
+      background-color: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .button.outline:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .no-image {
+      text-align: center;
+      padding: 40px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      margin: 40px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">Your ToolMemeX Creation</h1>
+      <p class="subtitle">Right-click (or press and hold on mobile) on the image and select "Save Image As..."</p>
+    </div>
+    
+    <div id="meme-container" class="image-container">
+      <!-- Image will be inserted here by JavaScript -->
+    </div>
+    
+    <div class="instructions">
+      <p><strong>To save your meme:</strong></p>
+      <p>Right-click (or press and hold on mobile) on the image above and select "Save Image As..."</p>
+    </div>
+    
+    <div class="button-container">
+      <a download="ToolMemeX-creation.png" id="download-link" class="button">Download Image</a>
+      <a href="/" class="button outline">Return to Meme Generator</a>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get the meme from localStorage
+      const memeData = localStorage.getItem('currentMeme');
+      const memeContainer = document.getElementById('meme-container');
+      const downloadLink = document.getElementById('download-link');
+      
+      if (memeData) {
+        // Create and append the image
+        const img = document.createElement('img');
+        img.src = memeData;
+        img.alt = 'Your generated meme';
+        memeContainer.appendChild(img);
+        
+        // Set the download link href
+        downloadLink.href = memeData;
+      } else {
+        // Show a message if no meme is found
+        memeContainer.innerHTML = `
+          <div class="no-image">
+            <p>No meme found. Return to the meme generator to create one.</p>
+          </div>
+        `;
+        downloadLink.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
