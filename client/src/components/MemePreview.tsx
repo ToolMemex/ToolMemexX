@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ImageIcon, DownloadIcon, ShareIcon } from 'lucide-react';
+import { ImageIcon, DownloadIcon, ShareIcon, ExternalLink } from 'lucide-react';
 import { MemeState } from '../pages/Home';
 
 interface MemePreviewProps {
@@ -19,7 +18,7 @@ const MemePreview: React.FC<MemePreviewProps> = ({
   onShareClick, 
   onFallbackMessage 
 }) => {
-  const [, setLocation] = useLocation();
+  const [generatedMemeUrl, setGeneratedMemeUrl] = useState<string | null>(null);
   const workerRef = useRef<Worker | null>(null);
   
   useEffect(() => {
@@ -119,12 +118,79 @@ const MemePreview: React.FC<MemePreviewProps> = ({
       // Get the final image data
       const imageDataUrl = canvas.toDataURL('image/png');
       
-      // Navigate to download page with image data
-      const encodedImageData = encodeURIComponent(imageDataUrl);
-      const encodedCaption = encodeURIComponent(memeState.selectedCaption);
+      // Store the image URL for direct opening
+      if (imageDataUrl) {
+        setGeneratedMemeUrl(imageDataUrl);
+      }
       
-      // IMPORTANT: Use the new download page approach
-      setLocation(`/download?image=${encodedImageData}&caption=${encodedCaption}`);
+      // Open in new window for direct viewing/saving
+      const newWindow = window.open('');
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head>
+              <title>Your ToolMemeX Meme - Right-click to Save</title>
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body { 
+                  font-family: system-ui, -apple-system, sans-serif;
+                  text-align: center;
+                  padding: 20px;
+                  background-color: #0C0C14;
+                  color: #fff;
+                  max-width: 800px;
+                  margin: 0 auto;
+                }
+                img {
+                  max-width: 100%;
+                  border-radius: 8px;
+                  margin-bottom: 20px;
+                  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+                }
+                .instruction {
+                  background: rgba(255,255,255,0.1);
+                  padding: 15px;
+                  border-radius: 8px;
+                  margin-bottom: 20px;
+                  font-size: 16px;
+                  line-height: 1.5;
+                }
+                h2 {
+                  color: #00C6FF;
+                  margin-bottom: 20px;
+                }
+                button {
+                  background: #2563EB;
+                  color: white;
+                  border: none;
+                  padding: 10px 20px;
+                  border-radius: 8px;
+                  cursor: pointer;
+                  font-size: 16px;
+                  font-weight: bold;
+                  margin-top: 20px;
+                }
+                button:hover {
+                  background: #1D4ED8;
+                }
+              </style>
+            </head>
+            <body>
+              <h2>Your ToolMemeX Creation</h2>
+              <img src="${imageDataUrl}" alt="Your meme">
+              <div class="instruction">
+                <strong>To save your meme:</strong><br>
+                Right-click (or press and hold on mobile) on the image and select "Save Image As..."
+              </div>
+              <button onclick="window.close()">Return to Meme Generator</button>
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
+      } else {
+        // Fallback for popup blockers
+        alert('Please allow popups to open your meme for downloading.');
+      }
     };
     
     img.onerror = function(error) {
@@ -192,7 +258,7 @@ const MemePreview: React.FC<MemePreviewProps> = ({
                   className="w-full btn-glow py-3 rounded-xl font-heading flex items-center justify-center"
                 >
                   <DownloadIcon className="h-5 w-5 mr-2" />
-                  Download Meme
+                  View & Save Meme
                 </Button>
               </div>
               <div className="w-full sm:w-1/2">
@@ -206,6 +272,14 @@ const MemePreview: React.FC<MemePreviewProps> = ({
                 </Button>
               </div>
             </div>
+            
+            {generatedMemeUrl && (
+              <div className="bg-[#10101C]/60 p-3 rounded-lg border border-[rgba(255,255,255,0.05)]">
+                <p className="text-xs text-gray-400 mb-2">
+                  If the button above doesn't work, right-click on the meme preview and select "Open image in new tab" or "Save image as..."
+                </p>
+              </div>
+            )}
             
             <div className="glass rounded-lg p-4">
               <h4 className="font-heading text-sm uppercase text-gray-400 mb-2">Caption Styling</h4>
