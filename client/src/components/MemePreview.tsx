@@ -73,10 +73,10 @@ const MemePreview: React.FC<MemePreviewProps> = ({
     setMemeState({ ...memeState, captionColor: value });
   };
   
-  const downloadMeme = () => {
+  const viewMeme = () => {
     if (!memeState.uploadedImage || !memeState.selectedCaption) return;
     
-    console.log('Starting meme download process');
+    console.log('Preparing meme preview');
     
     // Create a canvas to render the meme
     const canvas = document.createElement('canvas');
@@ -101,16 +101,30 @@ const MemePreview: React.FC<MemePreviewProps> = ({
       ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
       ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
       
-      // Draw caption text
-      ctx.fillStyle = 
-        memeState.captionColor === 'yellow' ? '#FBBF24' : 
-        memeState.captionColor === 'neon' ? '#00C6FF' : '#FFFFFF';
+      // Get color based on selection
+      let textColor = '#FFFFFF'; // Default white
+      switch(memeState.captionColor) {
+        case 'yellow': textColor = '#FBBF24'; break;
+        case 'neon': textColor = '#00C6FF'; break;
+        case 'green': textColor = '#4ADE80'; break;
+        case 'pink': textColor = '#F472B6'; break;
+        case 'purple': textColor = '#A78BFA'; break;
+        case 'orange': textColor = '#FB923C'; break;
+      }
       
-      ctx.font = 
-        memeState.captionFont === 'impact' ? 'bold 28px Impact, sans-serif' : 
-        memeState.captionFont === 'comic' ? '28px Comic Sans MS, cursive' : 
-        '28px Arial, sans-serif';
+      // Set text color
+      ctx.fillStyle = textColor;
       
+      // Get font based on selection
+      let fontFamily = '28px Arial, sans-serif'; // Default
+      if (memeState.captionFont === 'impact') {
+        fontFamily = 'bold 28px Impact, sans-serif';
+      } else if (memeState.captionFont === 'comic') {
+        fontFamily = '28px Comic Sans MS, cursive';
+      }
+      
+      // Set font
+      ctx.font = fontFamily;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
@@ -125,10 +139,8 @@ const MemePreview: React.FC<MemePreviewProps> = ({
       // Get the final image data
       const imageDataUrl = canvas.toDataURL('image/png');
       
-      // Store the image URL, save to localStorage and open dialog
+      // Open the dialog with the generated meme
       if (imageDataUrl) {
-        // Save to localStorage for the dedicated page to access
-        localStorage.setItem('currentMeme', imageDataUrl);
         setGeneratedMemeUrl(imageDataUrl);
         setDialogOpen(true);
       }
@@ -173,76 +185,6 @@ const MemePreview: React.FC<MemePreviewProps> = ({
     }
   };
   
-  const handleDownloadButtonClick = () => {
-    if (generatedMemeUrl) {
-      try {
-        // Convert data URL to Blob
-        const parts = generatedMemeUrl.split(';base64,');
-        const contentType = parts[0].split(':')[1];
-        const raw = window.atob(parts[1]);
-        const rawLength = raw.length;
-        const uInt8Array = new Uint8Array(rawLength);
-        
-        for (let i = 0; i < rawLength; ++i) {
-          uInt8Array[i] = raw.charCodeAt(i);
-        }
-        
-        // Create Blob and use it to trigger download
-        const blob = new Blob([uInt8Array], { type: contentType });
-        const blobUrl = URL.createObjectURL(blob);
-        
-        // Method 1: Use File System Access API (newer browsers)
-        if ('showSaveFilePicker' in window) {
-          (async () => {
-            try {
-              // @ts-ignore - TS doesn't know about this API yet
-              const handle = await window.showSaveFilePicker({
-                suggestedName: 'ToolMemeX-creation.png',
-                types: [{
-                  description: 'PNG Image',
-                  accept: {'image/png': ['.png']}
-                }]
-              });
-              const writable = await handle.createWritable();
-              await writable.write(blob);
-              await writable.close();
-              console.log('Saved using File System Access API');
-            } catch (err) {
-              console.error('File Save Error:', err);
-              
-              // Fallback to traditional method
-              const link = document.createElement('a');
-              link.href = blobUrl;
-              link.download = 'ToolMemeX-creation.png';
-              link.style.display = 'none';
-              document.body.appendChild(link);
-              link.click();
-              setTimeout(() => {
-                document.body.removeChild(link);
-                URL.revokeObjectURL(blobUrl);
-              }, 100);
-            }
-          })();
-        } else {
-          // Method 2: Traditional download (older browsers)
-          const link = document.createElement('a');
-          link.href = blobUrl;
-          link.download = 'ToolMemeX-creation.png';
-          link.style.display = 'none';
-          document.body.appendChild(link);
-          link.click();
-          setTimeout(() => {
-            document.body.removeChild(link);
-            URL.revokeObjectURL(blobUrl);
-          }, 100);
-        }
-      } catch (error) {
-        console.error('Download error:', error);
-        alert('Download failed. Please right-click on the image and select "Save Image As..." instead.');
-      }
-    }
-  };
-  
   return (
     <>
       {(!memeState.uploadedImage || !memeState.selectedCaption) ? (
@@ -273,11 +215,11 @@ const MemePreview: React.FC<MemePreviewProps> = ({
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="w-full sm:w-1/2">
                 <Button 
-                  onClick={downloadMeme}
+                  onClick={viewMeme}
                   className="w-full btn-glow py-3 rounded-xl font-heading flex items-center justify-center"
                 >
-                  <DownloadIcon className="h-5 w-5 mr-2" />
-                  View & Save Meme
+                  <ImageIcon className="h-5 w-5 mr-2" />
+                  View Full Meme
                 </Button>
               </div>
               <div className="w-full sm:w-1/2">
@@ -292,13 +234,7 @@ const MemePreview: React.FC<MemePreviewProps> = ({
               </div>
             </div>
             
-            {generatedMemeUrl && (
-              <div className="bg-[#10101C]/60 p-3 rounded-lg border border-[rgba(255,255,255,0.05)]">
-                <p className="text-xs text-gray-400 mb-2">
-                  If the button above doesn't work, right-click on the meme preview and select "Open image in new tab" or "Save image as..."
-                </p>
-              </div>
-            )}
+
             
             <div className="glass rounded-lg p-4">
               <h4 className="font-heading text-sm uppercase text-gray-400 mb-2">Caption Styling</h4>
@@ -339,71 +275,63 @@ const MemePreview: React.FC<MemePreviewProps> = ({
         </div>
       )}
       
-      {/* Dialog that shows when saving meme */}
+      {/* Dialog that shows full meme with saving instructions */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-[600px] bg-[#0C0C14] border border-gray-800">
           <DialogHeader>
             <DialogTitle className="text-xl font-heading text-center mb-4 text-[#00C6FF]">Your Meme Is Ready!</DialogTitle>
             <DialogDescription className="text-center text-gray-400">
-              Right-click on the image to save it to your device
+              Right-click on the image to save it to your device or take a screenshot
             </DialogDescription>
           </DialogHeader>
           
           {generatedMemeUrl && (
             <div className="flex flex-col items-center">
-              <div className="rounded-lg overflow-hidden mb-6 w-full max-w-lg mx-auto">
+              <div className="rounded-lg overflow-hidden mb-4 w-full max-w-lg mx-auto border-2 border-[#0f172a]">
+                <img 
+                  src={generatedMemeUrl} 
+                  alt="Your generated meme" 
+                  className="w-full h-auto"
+                />
+              </div>
+              
+              <div className="bg-[rgba(255,255,255,0.1)] p-4 rounded-lg mb-4 text-center w-full">
+                <p className="mb-2 font-medium text-[#00C6FF]">Save Options:</p>
+                <div className="space-y-2 text-left">
+                  <p className="text-sm text-gray-300">
+                    <span className="inline-block w-6 text-center">1.</span> 
+                    <strong>Right-click</strong> on the image and select <strong>"Save Image As..."</strong>
+                  </p>
+                  <p className="text-sm text-gray-300">
+                    <span className="inline-block w-6 text-center">2.</span>
+                    <strong>Screenshot</strong> the image (use your device's screenshot tool)
+                  </p>
+                  <p className="text-sm text-gray-300">
+                    <span className="inline-block w-6 text-center">3.</span>
+                    <strong>Open in new tab</strong> and save from there
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <a 
-                  href={generatedMemeUrl} 
-                  download="ToolMemeX-creation.png"
-                  target="_blank"
+                  href={generatedMemeUrl || '#'}
+                  target="_blank" 
                   rel="noopener noreferrer"
-                  className="block cursor-pointer"
+                  className="w-full"
                 >
-                  <img 
-                    src={generatedMemeUrl} 
-                    alt="Your generated meme" 
-                    className="w-full h-auto"
-                  />
-                  <div className="bg-black/50 backdrop-blur-sm text-white text-sm py-2 text-center">
-                    Click to open/download image in new tab
-                  </div>
-                </a>
-              </div>
-              
-              <div className="bg-[rgba(255,255,255,0.1)] p-4 rounded-lg mb-6 text-center">
-                <p className="mb-2 font-medium">To save your meme:</p>
-                <p className="text-sm text-gray-300">Right-click (or press and hold) on the image above and select "Save Image As..."</p>
-              </div>
-              
-              <div className="flex flex-col gap-3 w-full">
-                <div className="flex gap-3">
-                  <div className="w-full text-center p-3 bg-[#0f172a] rounded-lg">
-                    <p className="text-gray-300 text-sm">
-                      To save your meme, tap and hold (or right-click) on the image above and select "Download Image" or "Save Image"
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-3">
-                  <a 
-                    href={generatedMemeUrl || '#'}
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="w-full"
+                  <Button 
+                    className="w-full bg-[#1E293B] hover:bg-[#334155] text-white h-full flex items-center justify-center"
                   >
-                    <Button 
-                      className="w-full bg-[#1E293B] hover:bg-[#334155] text-white"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      View in New Tab
-                    </Button>
-                  </a>
-                </div>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Open in New Tab
+                  </Button>
+                </a>
                 
                 <Button 
                   variant="outline" 
                   onClick={() => setDialogOpen(false)}
-                  className="w-full bg-transparent"
+                  className="w-full bg-transparent border-[#00C6FF] text-[#00C6FF] hover:bg-[#00C6FF]/10"
                 >
                   Return to Editor
                 </Button>
