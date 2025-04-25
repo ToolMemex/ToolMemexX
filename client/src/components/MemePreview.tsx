@@ -29,33 +29,36 @@ const MemePreview: React.FC<MemePreviewProps> = ({
         // Create a worker
         const workerScript = `
           self.onmessage = function(e) {
-            // In a real implementation, this would convert the image to AVIF format
-            // For this demo, we'll just send back the original image data
-            setTimeout(() => {
-              self.postMessage({
-                status: 'success',
-                imageData: e.data.imageData
-              });
-            }, 500);
-          };
+            console.log('Web Worker initialized successfully');
+            // Normally here we'd process the image for AVIF compression
+            // We're not implementing full AVIF encoding in this demo
+            
+            // Just sending back confirmation
+            self.postMessage({ 
+              status: 'success', 
+              message: 'AVIF compression simulation completed' 
+            });
+          }
         `;
+
+        const blob = new Blob([workerScript], { type: 'application/javascript' });
+        workerRef.current = new Worker(URL.createObjectURL(blob));
         
-        const workerBlob = new Blob([workerScript], { type: 'application/javascript' });
-        const workerUrl = URL.createObjectURL(workerBlob);
-        workerRef.current = new Worker(workerUrl);
+        // Setup listener
+        workerRef.current.onmessage = (e) => {
+          console.log("Worker response:", e.data);
+        };
         
-        console.log('Web Worker initialized successfully');
+        // Initialize the worker
+        workerRef.current.postMessage({ action: 'init' });
       } catch (error) {
-        console.error('Web Worker initialization failed:', error);
-        // Set worker to null to ensure fallback is used
-        workerRef.current = null;
+        console.error("Could not initialize web worker:", error);
       }
     }
     
     return () => {
       if (workerRef.current) {
         workerRef.current.terminate();
-        workerRef.current = null;
       }
     };
   }, []);
@@ -158,6 +161,76 @@ const MemePreview: React.FC<MemePreviewProps> = ({
     }
   };
   
+  const handleDownloadButtonClick = () => {
+    if (generatedMemeUrl) {
+      try {
+        // Convert data URL to Blob
+        const parts = generatedMemeUrl.split(';base64,');
+        const contentType = parts[0].split(':')[1];
+        const raw = window.atob(parts[1]);
+        const rawLength = raw.length;
+        const uInt8Array = new Uint8Array(rawLength);
+        
+        for (let i = 0; i < rawLength; ++i) {
+          uInt8Array[i] = raw.charCodeAt(i);
+        }
+        
+        // Create Blob and use it to trigger download
+        const blob = new Blob([uInt8Array], { type: contentType });
+        const blobUrl = URL.createObjectURL(blob);
+        
+        // Method 1: Use File System Access API (newer browsers)
+        if ('showSaveFilePicker' in window) {
+          (async () => {
+            try {
+              // @ts-ignore - TS doesn't know about this API yet
+              const handle = await window.showSaveFilePicker({
+                suggestedName: 'ToolMemeX-creation.png',
+                types: [{
+                  description: 'PNG Image',
+                  accept: {'image/png': ['.png']}
+                }]
+              });
+              const writable = await handle.createWritable();
+              await writable.write(blob);
+              await writable.close();
+              console.log('Saved using File System Access API');
+            } catch (err) {
+              console.error('File Save Error:', err);
+              
+              // Fallback to traditional method
+              const link = document.createElement('a');
+              link.href = blobUrl;
+              link.download = 'ToolMemeX-creation.png';
+              link.style.display = 'none';
+              document.body.appendChild(link);
+              link.click();
+              setTimeout(() => {
+                document.body.removeChild(link);
+                URL.revokeObjectURL(blobUrl);
+              }, 100);
+            }
+          })();
+        } else {
+          // Method 2: Traditional download (older browsers)
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = 'ToolMemeX-creation.png';
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(blobUrl);
+          }, 100);
+        }
+      } catch (error) {
+        console.error('Download error:', error);
+        alert('Download failed. Please right-click on the image and select "Save Image As..." instead.');
+      }
+    }
+  };
+  
   return (
     <>
       {(!memeState.uploadedImage || !memeState.selectedCaption) ? (
@@ -255,16 +328,30 @@ const MemePreview: React.FC<MemePreviewProps> = ({
         <DialogContent className="sm:max-w-[600px] bg-[#0C0C14] border border-gray-800">
           <DialogHeader>
             <DialogTitle className="text-xl font-heading text-center mb-4 text-[#00C6FF]">Your Meme Is Ready!</DialogTitle>
+            <DialogDescription className="text-center text-gray-400">
+              Right-click on the image to save it to your device
+            </DialogDescription>
           </DialogHeader>
           
           {generatedMemeUrl && (
             <div className="flex flex-col items-center">
               <div className="rounded-lg overflow-hidden mb-6 w-full max-w-lg mx-auto">
-                <img 
-                  src={generatedMemeUrl} 
-                  alt="Your generated meme" 
-                  className="w-full h-auto"
-                />
+                <a 
+                  href={generatedMemeUrl} 
+                  download="ToolMemeX-creation.png"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block cursor-pointer"
+                >
+                  <img 
+                    src={generatedMemeUrl} 
+                    alt="Your generated meme" 
+                    className="w-full h-auto"
+                  />
+                  <div className="bg-black/50 backdrop-blur-sm text-white text-sm py-2 text-center">
+                    Click to open/download image in new tab
+                  </div>
+                </a>
               </div>
               
               <div className="bg-[rgba(255,255,255,0.1)] p-4 rounded-lg mb-6 text-center">
@@ -272,31 +359,34 @@ const MemePreview: React.FC<MemePreviewProps> = ({
                 <p className="text-sm text-gray-300">Right-click (or press and hold) on the image above and select "Save Image As..."</p>
               </div>
               
-              <div className="flex gap-4 w-full">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setDialogOpen(false)}
-                  className="flex-1 bg-transparent"
-                >
-                  Return to Editor
-                </Button>
+              <div className="flex flex-col gap-3 w-full">
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={() => window.open(generatedMemeUrl, '_blank')}
+                    className="flex-1 bg-[#1E293B] hover:bg-[#334155] text-white"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Open in New Tab
+                  </Button>
+                </div>
                 
-                <Button 
-                  className="flex-1 btn-glow"
-                  onClick={() => {
-                    if (generatedMemeUrl) {
-                      const link = document.createElement('a');
-                      link.href = generatedMemeUrl;
-                      link.download = 'ToolMemeX-creation.png';
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                    }
-                  }}
-                >
-                  <DownloadIcon className="h-4 w-4 mr-2" />
-                  Try Direct Download
-                </Button>
+                <div className="flex gap-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setDialogOpen(false)}
+                    className="flex-1 bg-transparent"
+                  >
+                    Return to Editor
+                  </Button>
+                  
+                  <Button 
+                    className="flex-1 btn-glow"
+                    onClick={handleDownloadButtonClick}
+                  >
+                    <DownloadIcon className="h-4 w-4 mr-2" />
+                    Download Image
+                  </Button>
+                </div>
               </div>
             </div>
           )}
