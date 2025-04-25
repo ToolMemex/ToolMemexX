@@ -17,7 +17,7 @@ const CaptionGenerator: FC<CaptionGeneratorProps> = ({ memeState, setMemeState }
     if (!memeState.uploadedImage) return;
     
     setIsGenerating(true);
-    // Simulate AI processing time
+    // Simulate AI processing time - no console logs needed
     setTimeout(() => {
       const generatedCaptions = generateCaptions(memeState.captionStyle);
       setCaptions(generatedCaptions);

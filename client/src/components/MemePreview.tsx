@@ -76,7 +76,7 @@ const MemePreview: React.FC<MemePreviewProps> = ({
   const viewMeme = () => {
     if (!memeState.uploadedImage || (!memeState.selectedCaption && !memeState.useCustomCaption)) return;
     
-    console.log('Preparing meme preview');
+    // Preparing meme preview
     
     // Create a canvas to render the meme
     const canvas = document.createElement('canvas');
@@ -89,7 +89,7 @@ const MemePreview: React.FC<MemePreviewProps> = ({
     const img = new Image();
     
     img.onload = function() {
-      console.log('Image loaded successfully');
+      // Image loaded successfully
       // Set canvas dimensions to match image
       canvas.width = img.width;
       canvas.height = img.height;
