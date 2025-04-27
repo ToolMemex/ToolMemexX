@@ -14,7 +14,7 @@ export const useSEO = ({ title, description, image, url }: SEOProps) => {
   const defaultImage = "/default-og-image.png";
   const defaultUrl = window.location.href;
 
-  return (
+  const seoData = (
     <Helmet>
       {/* Primary Meta Tags */}
       <title>{title}</title>
@@ -36,4 +36,6 @@ export const useSEO = ({ title, description, image, url }: SEOProps) => {
       <meta property="twitter:image" content={image || defaultImage} />
     </Helmet>
   );
+
+  return seoData;
 };
