@@ -69,12 +69,6 @@ export default function Profile() {
     }
   };
 
-  const SEO = useSEO({
-    title: `${watch('name') || 'My'} Profile | ToolMemeX`,
-    description: `Check out ${watch('name') || 'this'} profile and meme creations`,
-    image: previewUrl || undefined
-  })();
-
   return (
     <>
       {SeoComponent}
