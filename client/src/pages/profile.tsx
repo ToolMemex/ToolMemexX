@@ -31,7 +31,7 @@ export default function Profile() {
     },
   });
 
-  const seoComponent = useSEO({
+  const SEO = useSEO({
     title: `${watch('name') || 'Profile'} | ToolMemeX`, 
     description: `Check out ${watch('name') || 'this'} profile and meme creations`,
     image: previewUrl || '/default-profile.png',
