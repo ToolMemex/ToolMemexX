@@ -9,12 +9,12 @@ interface SEOProps {
   url?: string;
 }
 
-export const SEO = ({ title, description, image, url }: SEOProps) => {
+export const useSEO = ({ title, description, image, url }: SEOProps) => {
   const defaultDescription = "ToolMemeX - Create and share memes easily";
   const defaultImage = "/default-og-image.png";
   const defaultUrl = typeof window !== 'undefined' ? window.location.href : '';
 
-  return (
+  return () => (
     <Helmet>
       <title>{title}</title>
       <meta name="title" content={title} />
@@ -33,4 +33,4 @@ export const SEO = ({ title, description, image, url }: SEOProps) => {
   );
 };
 
-export default SEO;
+export default useSEO;
