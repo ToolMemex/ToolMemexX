@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
-import analyticsRoutes from './routes/analytics';  // (1) INSERTED here
+import analyticsRoutes from './route/analytics';  // (1) INSERTED here
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
