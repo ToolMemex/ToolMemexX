@@ -11,7 +11,7 @@ interface SEOProps {
 export const useSEO = ({ title, description, image, url }: SEOProps) => {
   const defaultDescription = "ToolMemeX - Create and share memes easily";
   const defaultImage = "/default-og-image.png";
-  const defaultUrl = window.location.href;
+  const defaultUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   return (
     <Helmet>
