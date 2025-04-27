@@ -1,133 +1,127 @@
-import { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
-import { Helmet } from 'react-helmet-async';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useSEO } from '@/hooks/useSEO';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/components/ui/use-toast';
-import { useTheme } from '@/contexts/ThemeContext';
+import { Button } from '@/components/ui/button';
+import { Helmet } from 'react-helmet-async';
 
-type ProfileFormData = {
-  name: string;
-  email: string;
-  profilePicture?: FileList;
-};
+const profileSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  profilePicture: z.instanceof(File).optional(),
+});
+
+type ProfileFormData = z.infer<typeof profileSchema>;
 
 export default function Profile() {
-  const [isEditing, setIsEditing] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const { theme } = useTheme();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [previewUrl, setPreviewUrl] = React.useState<string>('');
 
-  const { register, handleSubmit, watch } = useForm<ProfileFormData>();
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<ProfileFormData>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: 'John Doe',
+      email: 'john@example.com',
+    },
+  });
+
+  useSEO({
+    title: `${watch('name') || 'Profile'} | ToolMemeX`, // Handle initial load before watch updates
+    description: `Check out ${watch('name') || 'this'} profile and meme creations`, // Handle initial load before watch updates
+    image: previewUrl || '/default-profile.png',
+  });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewImage(reader.result as string);
+        setPreviewUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const onSubmit = async (data: ProfileFormData) => {
+    setIsLoading(true);
     try {
       // Optimistic update
       toast({
-        title: "Profile updated",
-        description: "Your changes have been saved successfully.",
+        title: 'Profile updated!',
+        description: 'Your changes have been saved.',
       });
-      setIsEditing(false);
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update profile',
+        variant: 'destructive',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
       <Helmet>
-        <title>My Profile | ToolMemeX</title>
-        <meta name="description" content="Edit your profile settings and preferences" />
-        <meta property="og:title" content="My Profile | ToolMemeX" />
-        <meta property="og:description" content="Edit your profile settings and preferences" />
-        {previewImage && <meta property="og:image" content={previewImage} />}
+        <title>{`${watch('name') || 'My'} Profile | ToolMemeX`}</title> {/*Dynamic title*/}
+        <meta name="description" content={`Check out ${watch('name') || 'this'} profile and meme creations`} /> {/*Dynamic description*/}
+        {previewUrl && <meta property="og:image" content={previewUrl} />}
+        <meta property="og:title" content={`${watch('name') || 'My'} Profile | ToolMemeX`} /> {/*Dynamic og:title*/}
+        <meta property="og:description" content={`Check out ${watch('name') || 'this'} profile and meme creations`} /> {/*Dynamic og:description*/}
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
-
-      <div className="container mx-auto p-6 max-w-2xl">
-        <Card className="p-6 bg-opacity-50 backdrop-blur-lg">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="container max-w-2xl mx-auto px-4 py-8">
+        <Card className="p-6">
+          {isLoading ? (
             <div className="space-y-4">
-              <div className="text-center">
-                <div className="relative w-32 h-32 mx-auto mb-4">
-                  <img
-                    src={previewImage || '/default-avatar.png'}
-                    alt="Profile"
-                    className="w-full h-full rounded-full object-cover transition-all"
-                  />
-                  {isEditing && (
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                      {...register('profilePicture')}
-                      onChange={handleImageChange}
-                    />
-                  )}
-                </div>
-              </div>
-
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-32 w-32 rounded-full mx-auto" />
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div>
-                <Input
-                  {...register('name', { required: true })}
-                  placeholder="Your name"
-                  disabled={!isEditing}
-                  className="transition-colors"
-                />
-              </div>
-
-              <div>
-                <Input
-                  {...register('email', {
-                    required: true,
-                    pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  })}
-                  type="email"
-                  placeholder="Your email"
-                  disabled={!isEditing}
-                  className="transition-colors"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                {isEditing ? (
-                  <>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsEditing(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit">Save Changes</Button>
-                  </>
-                ) : (
-                  <Button
-                    type="button"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    Edit Profile
-                  </Button>
+                <Input {...register('name')} placeholder="Name" />
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
                 )}
               </div>
-            </div>
-          </form>
+
+              <div>
+                <Input {...register('email')} type="email" placeholder="Email" />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="mb-4"
+                />
+                {previewUrl && (
+                  <img
+                    src={previewUrl}
+                    alt="Profile preview"
+                    className="w-32 h-32 rounded-full mx-auto object-cover"
+                  />
+                )}
+              </div>
+
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </form>
+          )}
         </Card>
       </div>
     </>
