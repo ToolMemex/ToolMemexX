@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme transition */
+html, body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+* {
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
 @font-face {
   font-family: 'Neue Machina';
   src: url('https://cdn.fontshare.com/wf/XZSNQOKLERWH5NUBEVBJ72GSTUIOWQKG/QMZPZOZTQPFZBVFYIVHE5L74VKWYLXBQ/JIBDDHPFGOPRRQ5SF6QKDLQE56QILCZS.woff2') format('woff2');
