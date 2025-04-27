@@ -1,5 +1,6 @@
 
 import { Helmet } from 'react-helmet-async';
+import React from 'react';
 
 interface SEOProps {
   title: string;
@@ -8,7 +9,7 @@ interface SEOProps {
   url?: string;
 }
 
-export const useSEO = ({ title, description, image, url }: SEOProps) => {
+export const useSEO = ({ title, description, image, url }: SEOProps): JSX.Element => {
   const defaultDescription = "ToolMemeX - Create and share memes easily";
   const defaultImage = "/default-og-image.png";
   const defaultUrl = typeof window !== 'undefined' ? window.location.href : '';
