@@ -1,10 +1,10 @@
-import { Router } from "express";
+
+import { Router } from 'express';
 
 const router = Router();
 
-router.post("/", (req, res) => {
-  console.log("Analytics received:", req.body);
-  res.status(200).json({ success: true });
+router.get('/', (req, res) => {
+  res.json({ message: 'Analytics endpoint' });
 });
 
 export default router;
