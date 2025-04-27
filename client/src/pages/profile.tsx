@@ -31,11 +31,13 @@ export default function Profile() {
     },
   });
 
-  useSEO({
-    title: `${watch('name') || 'Profile'} | ToolMemeX`, // Handle initial load before watch updates
-    description: `Check out ${watch('name') || 'this'} profile and meme creations`, // Handle initial load before watch updates
+  const { updateHead } = useSEO({
+    title: `${watch('name') || 'Profile'} | ToolMemeX`,
+    description: `Check out ${watch('name') || 'this'} profile and meme creations`,
     image: previewUrl || '/default-profile.png',
   });
+
+  updateHead();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
