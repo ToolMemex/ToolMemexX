@@ -37,8 +37,6 @@ export default function Profile() {
     image: previewUrl || '/default-profile.png',
   });
 
-  const SEOComponent = SEO();
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
