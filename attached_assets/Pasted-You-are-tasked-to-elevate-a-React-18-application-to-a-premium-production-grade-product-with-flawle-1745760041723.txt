@@ -1,0 +1,47 @@
+You are tasked to elevate a React 18+ application to a premium, production-grade product with flawless UX, performance, accessibility, and SEO readiness. Implement the following deliverables precisely:
+
+---
+
+1. **Global Dark Mode Context System:**
+   - Create a `ThemeProvider` using React Context API.
+   - Automatically detect system theme (`matchMedia('(prefers-color-scheme: dark)')`).
+   - Persist user preference in `localStorage` with fallback.
+   - Apply `dark` class to `<html>` or `<body>`, enabling Tailwind's dark mode utilities.
+   - Animate theme transitions smoothly using TailwindCSS `transition-colors transition-background`.
+
+2. **Editable, Optimistic Profile Form:**
+   - Build a modular, validated form using `react-hook-form`.
+   - Fields:
+     - `Name`: Required text input.
+     - `Email`: Required input with strict email validation.
+     - `Profile Picture`: Image upload with instant preview (FileReader API).
+   - Optimistically update UI upon submission.
+   - Convert uploaded images to WebP format before preview/save.
+   - Display skeleton loaders, error boundaries, and toast notifications (success/error).
+
+3. **Dynamic SEO with react-helmet-async:**
+   - Integrate `react-helmet-async` across the app with `<HelmetProvider>`.
+   - On Profile page, inject Open Graph and Twitter Card meta tags:
+     - Title: Dynamic based on user name.
+     - Description: Personalized.
+     - Image: Profile image URL fallback.
+     - URL: Dynamic page URL.
+   - Setup default meta data in case of missing fields.
+   - Optional: Implement JSON-LD structured schema for profiles.
+
+4. **Engineering Requirements:**
+   - Modularize theme logic into a `useTheme` custom hook.
+   - Create a `useSEO` hook for injecting meta tags dynamically.
+   - Enforce WCAG accessibility standards.
+   - Fully responsive across all screen sizes.
+   - Lazy-load non-critical assets (e.g., profile image).
+   - Use error boundaries for critical components.
+
+5. **Technology Stack:**
+   - React 18+
+   - TailwindCSS (dark mode enabled)
+   - react-hook-form
+   - react-helmet-async
+   - react-toastify
+
+Outcome: A fully responsive, dark-mode enabled, SEO-optimized, high-performance React application ready for public launch.
