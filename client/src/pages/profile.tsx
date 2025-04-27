@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -8,7 +9,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Helmet } from 'react-helmet-async';
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -32,10 +32,10 @@ export default function Profile() {
   });
 
   const SEO = useSEO({
-    title: `${watch('name') || 'Profile'} | ToolMemeX`, 
+    title: `${watch('name') || 'Profile'} | ToolMemeX`,
     description: `Check out ${watch('name') || 'this'} profile and meme creations`,
-    image: previewUrl || '/default-profile.png',
-  })();
+    image: previewUrl || '/default-profile.png'
+  });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,7 +51,6 @@ export default function Profile() {
   const onSubmit = async (data: ProfileFormData) => {
     setIsLoading(true);
     try {
-      // Optimistic update
       toast({
         title: 'Profile updated!',
         description: 'Your changes have been saved.',
@@ -69,7 +68,7 @@ export default function Profile() {
 
   return (
     <>
-      {SeoComponent}
+      {SEO}
       <div className="container max-w-2xl mx-auto px-4 py-8">
         <Card className="p-6">
           {isLoading ? (
