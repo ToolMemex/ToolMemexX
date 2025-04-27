@@ -34,6 +34,7 @@ const useTheme = () => {
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
+      <HelmetProvider>
       <ThemeProvider defaultTheme="system" storageKey="ui-theme">
         <div>
           <Route path="/" component={Home} />
@@ -42,6 +43,7 @@ const App = () => {
         </div>
       </ThemeProvider>
       <Toaster />
+    </HelmetProvider>
     </QueryClientProvider>
   );
 };
