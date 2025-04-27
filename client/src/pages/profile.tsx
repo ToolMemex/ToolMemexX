@@ -69,22 +69,11 @@ export default function Profile() {
     }
   };
 
-  const seoComponent = () => {
-    return (
-      <>
-        <Helmet>
-          <title>{`${watch('name') || 'My'} Profile | ToolMemeX`}</title> {/*Dynamic title*/}
-          <meta name="description" content={`Check out ${watch('name') || 'this'} profile and meme creations`} /> {/*Dynamic description*/}
-          {previewUrl && <meta property="og:image" content={previewUrl} />}
-          <meta property="og:title" content={`${watch('name') || 'My'} Profile | ToolMemeX`} /> {/*Dynamic og:title*/}
-          <meta property="og:description" content={`Check out ${watch('name') || 'this'} profile and meme creations`} /> {/*Dynamic og:description*/}
-          <meta name="twitter:card" content="summary_large_image" />
-        </Helmet>
-      </>
-    );
-  };
-
-  const SeoComponent = seoComponent();
+  const SEO = useSEO({
+    title: `${watch('name') || 'My'} Profile | ToolMemeX`,
+    description: `Check out ${watch('name') || 'this'} profile and meme creations`,
+    image: previewUrl || undefined
+  })();
 
   return (
     <>
