@@ -1,10 +1,14 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express, { Request, Response, NextFunction } from "express";
+import analyticsRoutes from './routes/analytics';  // (1) INSERTED here
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// (2) INSERT analytics route after express.json():
+app.use('/api/analytics', analyticsRoutes);
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -46,28 +50,20 @@ app.use((req, res, next) => {
 
       res.status(status).json({ message });
       console.error('Error middleware triggered:', err);
-      // Don't throw the error here as it will crash the server
     });
 
-    // importantly only setup vite in development and after
-    // setting up all the other routes so the catch-all route
-    // doesn't interfere with the other routes
     if (app.get("env") === "development") {
       await setupVite(app, server);
     } else {
       serveStatic(app);
     }
 
-    // ALWAYS serve the app on port 5000
-    // this serves both the API and the client.
-    // It is the only port that is not firewalled.
     const port = process.env.PORT || 5000;
     const host = "0.0.0.0";
-    
-    // Try to listen on the port, with retries if it fails
+
     let retryCount = 0;
     const maxRetries = 3;
-    
+
     const startServer = () => {
       server.listen({
         port,
@@ -86,10 +82,9 @@ app.use((req, res, next) => {
         }
       });
     };
-    
+
     startServer();
-    
-    // Handle server errors to prevent crashes
+
     server.on('error', (error) => {
       console.error('Server error:', error);
     });

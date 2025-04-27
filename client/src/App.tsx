@@ -1,29 +1,27 @@
-import { Switch, Route, Link } from "wouter";
-import { queryClient } from "./lib/queryClient";
+// src/App.tsx
+
 import { QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
-import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import Test from "@/pages/Test";
+import NotFound from "@/pages/not-found";
 
-function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/test" component={Test} />
-      {/* Fallback to 404 */}
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
-
-function App() {
+const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/test" element={<Test />} />
+          {/* Catch-all 404 route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
       <Toaster />
     </QueryClientProvider>
   );
-}
+};
 
 export default App;
