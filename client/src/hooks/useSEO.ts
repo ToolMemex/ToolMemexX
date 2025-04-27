@@ -13,7 +13,7 @@ export const useSEO = ({ title, description, image, url }: SEOProps) => {
   const defaultImage = "/default-og-image.png";
   const defaultUrl = typeof window !== 'undefined' ? window.location.href : '';
 
-  const updateHead = () => (
+  const SEOComponent = () => (
     <Helmet>
       <title>{title}</title>
       <meta name="title" content={title} />
@@ -31,5 +31,5 @@ export const useSEO = ({ title, description, image, url }: SEOProps) => {
     </Helmet>
   );
 
-  return { updateHead };
+  return { SEOComponent };
 };
