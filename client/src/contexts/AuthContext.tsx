@@ -1,6 +1,6 @@
 // src/contexts/AuthContext.tsx
-
 import React, { createContext, useState, useEffect, ReactNode, useContext, useReducer } from "react";
+import { ThemeProvider, useTheme } from './ThemeContext'; //Import the new components
 
 // Define state type
 interface AuthState {
@@ -121,5 +121,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     <AuthContext.Provider value={{ state, dispatch, refreshAuth }}>
       {children}
     </AuthContext.Provider>
+  );
+};
+
+//This is where the ThemeProvider wraps the AuthProvider
+export const CombinedProviders = ({ children }: { children: ReactNode }) => {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        {children}
+      </AuthProvider>
+    </ThemeProvider>
   );
 };

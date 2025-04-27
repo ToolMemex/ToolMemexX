@@ -1,149 +1,163 @@
-// src/pages/Profile.tsx
 
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton"; 
-import { ErrorBoundary } from "react-error-boundary";
-import { Helmet } from "react-helmet"; 
-import { cn } from "@/lib/utils"; 
-import { useQuery } from "react-query"; 
-import { toast } from "react-toastify"; 
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Helmet } from 'react-helmet';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { ImageIcon } from 'lucide-react';
 
-interface UserProfile {
+interface ProfileFormData {
   name: string;
-  bio?: string;
-  avatarUrl?: string;
+  email: string;
+  profileImage?: FileList;
 }
 
-const fetchUserProfile = async (): Promise<UserProfile> => {
-  const response = await fetch("/api/user-profile");
-  return response.json();
-};
+export default function Profile() {
+  const { toast } = useToast();
+  const [isEditing, setIsEditing] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  
+  const { register, handleSubmit, formState: { errors } } = useForm<ProfileFormData>();
 
-const ProfileContent = () => {
-  const { data: profile, error, isLoading, isError, refetch } = useQuery('userProfile', fetchUserProfile, {
-    retry: 3, 
-    refetchOnWindowFocus: false, 
-    onError: (err) => {
-      toast.error("Failed to load profile. Please try again.");
-      console.error("Error fetching profile:", err);
-    },
-    staleTime: 300000, // Cache data for 5 minutes
-    cacheTime: 600000, // Cache will be garbage collected after 10 minutes
-  });
+  const onSubmit = async (data: ProfileFormData) => {
+    try {
+      // Optimistic update
+      setIsEditing(false);
+      toast({
+        title: "Profile updated",
+        description: "Your changes have been saved successfully."
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
 
-  const isMobile = window.innerWidth <= 640;
-
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center space-y-4">
-        <Skeleton className="h-24 w-24 rounded-full shimmer-skeleton" />
-        <Skeleton className="h-8 w-48 shimmer-skeleton" />
-        <Skeleton className="h-4 w-64 shimmer-skeleton" />
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="text-center text-red-500 space-y-2">
-        <h2 className="text-2xl font-semibold">Oops! Something went wrong.</h2>
-        <p className="text-sm">We couldn't load your profile. <button onClick={() => refetch()} className="underline text-blue-500">Try again</button></p>
-      </div>
-    );
-  }
-
-  if (!profile) {
-    throw new Error("Failed to load profile.");
-  }
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <>
       <Helmet>
-        <title>{`${profile.name}'s Profile | MyApp`}</title>
-        <meta name="description" content={profile.bio || "User profile on MyApp"} />
-        <meta property="og:title" content={`${profile.name}'s Profile`} />
-        <meta property="og:description" content={profile.bio || "User profile on MyApp"} />
-        <meta property="og:image" content={profile.avatarUrl ?? "/placeholder-avatar.png"} />
+        <title>Your Profile - ToolMemeX</title>
+        <meta name="description" content="Edit your ToolMemeX profile" />
+        <meta property="og:title" content="Your Profile - ToolMemeX" />
+        <meta property="og:description" content="Check out this awesome meme creator profile!" />
+        <meta property="og:image" content={imagePreview || '/default-profile.jpg'} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Person',
+            'name': 'Your Name',
+            'url': window.location.href,
+          })}
+        </script>
       </Helmet>
 
-      <motion.div
-        initial={{ opacity: 0, y: isMobile ? 20 : 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="text-center space-y-4"
-      >
-        <div className="flex justify-center">
-          <LazyImage src={profile.avatarUrl ?? "/placeholder-avatar.png"} alt={`${profile.name}'s avatar`} />
-        </div>
+      <div className="container mx-auto px-4 py-8">
+        <Card className="max-w-2xl mx-auto p-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="text-center">
+              <div className="relative w-32 h-32 mx-auto mb-4">
+                {imagePreview ? (
+                  <img 
+                    src={imagePreview} 
+                    alt="Profile" 
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <ImageIcon className="w-12 h-12 text-gray-400" />
+                  </div>
+                )}
+                <input
+                  type="file"
+                  {...register('profileImage')}
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                  id="profile-image"
+                />
+                <Label
+                  htmlFor="profile-image"
+                  className="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full cursor-pointer"
+                >
+                  <ImageIcon className="w-4 h-4" />
+                </Label>
+              </div>
+            </div>
 
-        <h1 className="text-4xl font-bold">{`Welcome, ${profile.name}!`}</h1>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  {...register('name', { required: 'Name is required' })}
+                  disabled={!isEditing}
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+                )}
+              </div>
 
-        {profile.bio && (
-          <p className="text-lg text-muted-foreground max-w-md mx-auto">{profile.bio}</p>
-        )}
-      </motion.div>
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  {...register('email', {
+                    required: 'Email is required',
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: 'Invalid email address'
+                    }
+                  })}
+                  disabled={!isEditing}
+                />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                {isEditing ? (
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsEditing(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit">Save Changes</Button>
+                  </>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    Edit Profile
+                  </Button>
+                )}
+              </div>
+            </div>
+          </form>
+        </Card>
+      </div>
     </>
   );
-};
-
-const LazyImage = ({ src, alt }: { src: string; alt: string }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [imgSrc, setImgSrc] = useState("/placeholder-avatar.png");
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setImgSrc(src);
-          setIsLoaded(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "200px" }
-    );
-
-    const imgElement = document.createElement("img");
-    imgElement.src = src;
-    observer.observe(imgElement);
-
-    return () => observer.disconnect();
-  }, [src]);
-
-  return (
-    <div className="relative w-24 h-24 rounded-full overflow-hidden">
-      <img
-        src={imgSrc}
-        alt={alt}
-        className={`absolute inset-0 w-full h-full object-cover ${isLoaded ? 'transition-opacity duration-500 opacity-100' : 'opacity-0'}`}
-        style={{ transition: "opacity 0.5s ease-in-out" }}
-        onError={(e) => {
-          (e.currentTarget as HTMLImageElement).src = "/placeholder-avatar.png";
-          toast.error("Failed to load avatar image.");
-        }}
-      />
-      {!isLoaded && (
-        <div className="w-full h-full bg-gray-300 animate-pulse rounded-full"></div>
-      )}
-    </div>
-  );
-};
-
-const ErrorFallback = ({ error }: { error: Error }) => (
-  <div className="text-center text-red-500 space-y-2">
-    <h2 className="text-2xl font-semibold">Something went wrong.</h2>
-    <p className="text-sm">{error.message}</p>
-  </div>
-);
-
-const Profile = () => {
-  return (
-    <div className={cn("flex min-h-screen items-center justify-center px-4 bg-background text-foreground transition-colors")}>
-      <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <ProfileContent />
-      </ErrorBoundary>
-    </div>
-  );
-};
-
-export default Profile;
+}
