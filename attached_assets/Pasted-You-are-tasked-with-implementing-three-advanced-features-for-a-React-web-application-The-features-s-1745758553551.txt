@@ -1,0 +1,62 @@
+You are tasked with implementing three advanced features for a React web application. The features should include state management, performance optimizations, accessibility, and dynamic SEO. The features are as follows:
+
+---
+
+### **1. Dark Mode Toggle (Advanced)**
+
+**Objective**: Implement a highly functional and accessible dark mode toggle that supports system preferences, persists the user's theme choice, and ensures smooth transitions.
+
+**Key Features**:
+- **Theme Context**: Use React Context API to manage and provide global theme state across the entire app.
+- **Persistence**: Store the user's dark mode preference in **localStorage**, and apply it when the page loads. If no preference is saved, fallback to the user's system theme.
+- **System Preference**: On initial load, detect and apply the system's light/dark preference, and provide an option to override it.
+- **Smooth Transitions**: Apply smooth transitions for theme changes, ensuring a seamless experience.
+- **Performance**: Ensure the theme is applied as early as possible in the loading process to avoid layout shifts. Use `useEffect` to ensure that theme state is set before rendering.
+- **Accessibility**: Use `aria-label="Toggle dark mode"` for the toggle button, ensuring compatibility with screen readers.
+
+---
+
+### **2. Editable Profile Info (Advanced)**
+
+**Objective**: Create an editable profile page where users can update their name, email, and profile picture. Ensure **real-time validation**, **user-friendly error handling**, and **optimistic UI updates**.
+
+**Key Features**:
+- **Form Handling**: Use `react-hook-form` to manage the form, including validation (e.g., email format) and error handling.
+- **Optimistic UI**: Update the UI immediately when the user edits their profile data, and reflect backend changes once confirmed. Show loading indicators and success/failure feedback messages using `react-toastify`.
+- **Real-Time Validation**: Perform immediate validation for fields such as email and name using regex and async validation (e.g., checking if an email already exists).
+- **Editable Fields**: Allow users to toggle between viewing and editing profile information.
+- **Profile Image Upload**: Include an image upload option for users to update their profile picture, with basic image optimization (e.g., convert to WebP).
+- **Error Handling**: Implement clear, concise error messages and prevent invalid data submission.
+
+---
+
+### **3. Open Graph SEO Meta Tags (Dynamic)**
+
+**Objective**: Dynamically generate SEO-friendly Open Graph and Twitter Card meta tags for each user profile to improve social media sharing and search engine optimization.
+
+**Key Features**:
+- **Dynamic Meta Tags**: Use `react-helmet` to inject meta tags into the document `<head>` for each user’s profile page:
+  - `og:title`: Set dynamically to "Profile of [userName]".
+  - `og:description`: Create a dynamic description like "Check out the profile of [userName].".
+  - `og:image`: Use the user's profile image for better sharing previews.
+  - `og:url`: Set dynamically to the user's profile URL, e.g., `https://yourwebsite.com/profile/[userId]`.
+- **Twitter Card Support**: Include appropriate meta tags for Twitter cards to optimize appearance on Twitter.
+- **Fallback Values**: Ensure that default content is provided if a user has missing information, like a fallback image or default description.
+- **Structured Data**: Add structured data (JSON-LD) to further optimize SEO for rich snippets in search results.
+
+---
+
+### **Code Structure and Tools**:
+- Use **React Context API** for theme management.
+- Use **react-hook-form** for managing and validating the form.
+- Use **react-toastify** for providing real-time user feedback (success and error messages).
+- Use **react-helmet** for injecting dynamic SEO meta tags into the document header.
+- Use **tailwindcss** for styling, including smooth transitions for dark mode and form controls.
+- Include **image upload handling** and **file preview** for profile images with basic optimization.
+
+---
+
+### **Additional Notes**:
+- Ensure accessibility standards are followed, including keyboard navigation and ARIA attributes.
+- Implement responsive design to ensure the profile page looks good on all screen sizes.
+- Prioritize performance by reducing unnecessary re-renders, lazy loading images, and applying best practices for SEO.
