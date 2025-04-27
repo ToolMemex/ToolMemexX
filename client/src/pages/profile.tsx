@@ -31,11 +31,13 @@ export default function Profile() {
     },
   });
 
-  const SEO = useSEO({
+  const SEOComponent = useSEO({
     title: `${watch('name') || 'Profile'} | ToolMemeX`, 
     description: `Check out ${watch('name') || 'this'} profile and meme creations`,
     image: previewUrl || '/default-profile.png',
   });
+
+  const SEO = SEOComponent();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
