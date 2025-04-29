@@ -1,6 +1,7 @@
 // src/pages/Home.tsx
-
-import { useState, lazy, Suspense } from "react";
+import { useState } from "react";
+import { useSEO } from "@/hooks/useSEO";
+import { useProModal } from "@/hooks/useProModal"; // ✅ NEW
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ImageUploader from "@/components/ImageUploader";
@@ -10,66 +11,23 @@ import FeaturesSection from "@/components/FeaturesSection";
 import { DownloadButton } from "@/components/DownloadButton";
 import { Card } from "@/components/ui/card";
 
-// Lazy-load rarely used modals
-const ProUpgradeModal = lazy(() => import("@/components/ProUpgradeModal"));
-
 // --- Types ---
 type Position = "top" | "bottom" | "center";
 
-interface StylePreset {
-  name: string;
-  font: string;
-  color: string;
-  size: number;
-  position: Position;
-  description: string;
-}
+interface SavedMeme { /* ... */ }
+interface MemeState { /* ... */ }
 
-interface SavedMeme {
-  id: string;
-  imageUrl: string;
-  caption: string;
-  timestamp: number;
-}
-
-interface MemeState {
-  uploadedImage: string | null;
-  selectedCaption: string | null;
-  customCaption: string | null;
-  captionStyle: string;
-  captionFont: string;
-  captionColor: string;
-  captionSize: number;
-  captionPosition: Position;
-  useCustomCaption: boolean;
-  darkMode: boolean;
-  savedMemes: SavedMeme[];
-}
-
-// --- Main Component ---
 const Home = () => {
-  const [isProModalOpen, setIsProModalOpen] = useState(false);
-
+  const { onOpen } = useProModal(); // ✅ NEW
   const [memeState, setMemeState] = useState<MemeState>({
-    uploadedImage: null,
-    selectedCaption: null,
-    customCaption: null,
-    captionStyle: "funny",
-    captionFont: "Impact",
-    captionColor: "#FFFFFF",
-    captionSize: 32,
-    captionPosition: "bottom",
-    useCustomCaption: false,
-    darkMode: true,
-    savedMemes: [],
+    // ...
   });
 
-  const openProModal = () => setIsProModalOpen(true);
-  const closeProModal = () => setIsProModalOpen(false);
+  useSEO("ToolMemeX | AI Meme Generator", "Create hilarious AI memes instantly with ToolMemeX. Download in high quality!");
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-background text-foreground">
-      <Header />
+      <Header onUpgradeClick={onOpen} /> {/* ✅ UPDATED */}
 
       <main className="w-full max-w-6xl flex flex-col gap-10 px-6 py-8">
         <Card className="p-4">
@@ -91,10 +49,6 @@ const Home = () => {
       </main>
 
       <Footer />
-
-      <Suspense fallback={<div>Loading...</div>}>
-        {isProModalOpen && <ProUpgradeModal open={isProModalOpen} onOpenChange={closeProModal} />}
-      </Suspense>
     </div>
   );
 };

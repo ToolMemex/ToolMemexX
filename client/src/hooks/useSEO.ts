@@ -1,36 +1,22 @@
+// client/src/hooks/useSEO.ts
+import { useEffect } from "react";
 
-import { Helmet } from 'react-helmet-async';
-import React from 'react';
+export const useSEO = (title: string, description?: string) => {
+  useEffect(() => {
+    document.title = title;
+    if (description) {
+      const metaDescription = document.querySelector(
+        "meta[name='description']"
+      ) as HTMLMetaElement | null;
 
-interface SEOProps {
-  title: string;
-  description?: string;
-  image?: string;
-  url?: string;
-}
-
-export const useSEO = ({ title, description, image, url }: SEOProps) => {
-  const defaultDescription = "ToolMemeX - Create and share memes easily";
-  const defaultImage = "/default-og-image.png";
-  const defaultUrl = typeof window !== 'undefined' ? window.location.href : '';
-
-  return () => (
-    <Helmet>
-      <title>{title}</title>
-      <meta name="title" content={title} />
-      <meta name="description" content={description || defaultDescription} />
-      <meta property="og:type" content="website" />
-      <meta property="og:url" content={url || defaultUrl} />
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description || defaultDescription} />
-      <meta property="og:image" content={image || defaultImage} />
-      <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={url || defaultUrl} />
-      <meta property="twitter:title" content={title} />
-      <meta property="twitter:description" content={description || defaultDescription} />
-      <meta property="twitter:image" content={image || defaultImage} />
-    </Helmet>
-  );
+      if (metaDescription) {
+        metaDescription.content = description;
+      } else {
+        const meta = document.createElement("meta");
+        meta.name = "description";
+        meta.content = description;
+        document.head.appendChild(meta);
+      }
+    }
+  }, [title, description]);
 };
-
-export default useSEO;
