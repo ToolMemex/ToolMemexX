@@ -7,7 +7,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { queryClient } from './lib/queryClient';
 import { Switch, Route } from 'wouter';
 import Home from './pages/Home';
-import profile from './pages/Profile';
+import profile from './pages/profile';
 import UploadPage from './pages/UploadPage';
 import Test from './pages/Test';
 import NotFound from './pages/NotFound';
