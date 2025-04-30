@@ -1,7 +1,7 @@
 import { FC, useState, useRef, useCallback } from "react";
 import { ImageIcon, X } from "lucide-react";
 import type { MemeState } from "@/pages/Home";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { compressImageWithCanvas } from "@/lib/image-optimizer";
 import { useDropzone } from "react-dropzone";
 import { Blurhash } from "react-blurhash";
