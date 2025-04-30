@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { Spinner } from "@/components/LoadingSpinner"; // Update this if your Spinner path is different
-import { showErrorToast } from "@/lib/toast"; // Update this if your toast is different
+import { showErrorToast } from "@/components/ui/toast"; // Update this if your toast is different
 import { memeState } from "@/stores/meme-store"; // Update this if your memeState is different
 
 export function DownloadButton() {
