@@ -2,7 +2,7 @@
 import React, { Suspense, lazy } from "react";
 import { Loader2 } from "lucide-react";
 
-const ProUpgradeModal = lazy(() => import("../ProUpgradeModal"));
+const ProUpgradeModal = lazy(() => import("./ProUpgradeModal"));
 
 interface LazyProModalProps {
   isOpen: boolean;
