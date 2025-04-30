@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { SparklesIcon, CrownIcon } from "lucide-react";
 import { useProModal } from "@/hooks/useProModal";
 
-const LazyProUpgradeModal = lazy(() => import("@/components/modal/lazyProModal"));
+const LazyProUpgradeModal = lazy(() => import("@/components/modals/lazyProModal"));
 
 const Header = () => {
   const { isOpen, open, close } = useProModal();
