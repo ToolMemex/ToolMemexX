@@ -1,14 +1,14 @@
 import type { Config } from "tailwindcss";
 
-export default {
+const config: Config = {
   darkMode: ["class"],
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
       fontSize: {
-        small: '0.875rem',   // 14px
-        medium: '1rem',      // 16px
-        large: '1.125rem',   // 18px
+        small: "0.875rem",   // 14px
+        medium: "1rem",      // 16px
+        large: "1.125rem",   // 18px
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -83,5 +83,10 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
-} satisfies Config;
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
+  ],
+};
+
+export default config;
