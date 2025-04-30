@@ -1,4 +1,4 @@
-// components/modals/LazyProModal.tsx
+// client/src/components/modal/LazyProModal.tsx
 import React, { Suspense, lazy } from "react";
 import { Loader2 } from "lucide-react";
 
