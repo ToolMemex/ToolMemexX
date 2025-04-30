@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
-import { Spinner } from "@/components/LoadingSpinner"; // Update this if your Spinner path is different
-import { showErrorToast } from "@/components/ui/toast"; // Update this if your toast is different
-import { memeState } from "../stores/meme-store"; // Update this if your memeState is different
+import { Spinner } from "@/components/LoadingSpinner";
+import { showErrorToast } from "@/components/ui/toast";
+import { useMemeStore } from "@/stores/meme-store"; // Correct Zustand hook import
 
 export function DownloadButton() {
   const [downloadState, setDownloadState] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const isDownloading = downloadState === 'processing';
+
+  const uploadedImage = useMemeStore((state) => state.memes[0]?.url); // Example use – update if needed
 
   const handleDownload = async () => {
     setDownloadState('processing');
@@ -22,8 +24,8 @@ export function DownloadButton() {
       const filename = `meme-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}_UTC${tzSign}${timezoneOffset}.webp`;
 
       const getDownloadURL = async (): Promise<string> => {
-        if (memeState.uploadedImage) {
-          return memeState.uploadedImage;
+        if (uploadedImage) {
+          return uploadedImage;
         }
         const canvas = document.querySelector('canvas');
         if (!canvas) throw new Error('Canvas not found');
@@ -41,23 +43,21 @@ export function DownloadButton() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      if (!memeState.uploadedImage) URL.revokeObjectURL(url);
+      if (!uploadedImage) URL.revokeObjectURL(url);
 
       const downloadDuration = performance.now() - startTime;
 
-      // Google Analytics tracking
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('event', 'meme_download', {
           event_category: 'Meme Actions',
           event_label: filename,
           file_type: 'webp',
-          source: memeState.uploadedImage ? 'upload' : 'canvas',
+          source: uploadedImage ? 'upload' : 'canvas',
           download_duration_ms: Math.round(downloadDuration),
           success: true,
         });
       }
 
-      // Backend tracking
       await fetch('/api/analytics', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -66,7 +66,7 @@ export function DownloadButton() {
           timestamp: new Date().toISOString(),
           downloadDurationMs: Math.round(downloadDuration),
           fileType: 'webp',
-          source: memeState.uploadedImage ? 'upload' : 'canvas',
+          source: uploadedImage ? 'upload' : 'canvas',
         }),
       });
 
@@ -90,7 +90,7 @@ export function DownloadButton() {
   return (
     <button
       onClick={handleDownload}
-      disabled={!memeState.uploadedImage && !document.querySelector('canvas')}
+      disabled={!uploadedImage && !document.querySelector('canvas')}
       aria-label="Download Meme"
       data-analytics-event="meme-download"
       className={`
