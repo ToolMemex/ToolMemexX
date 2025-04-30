@@ -12,7 +12,7 @@ import UploadPage from './pages/UploadPage';
 import Test from './pages/Test';
 import NotFound from './pages/not-found';
 import { useProModal } from "@/hooks/useProModal";
-import LazyProModal from "@/components/modal/LazyProModal";
+import LazyProModal from "@/components/modals/LazyProModal";
 
 const App = () => {
   const { onOpen } = useProModal();
