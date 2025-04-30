@@ -10,7 +10,7 @@ import Home from './pages/Home';
 import Profile from './pages/Profile';
 import UploadPage from './pages/UploadPage';
 import Test from './pages/Test';
-import NotFound from './pages/NotFound';
+import NotFound from './pages/not-found';
 import { useProModal } from "@/hooks/useProModal";
 import LazyProModal from "@/components/modal/LazyProModal";
 
