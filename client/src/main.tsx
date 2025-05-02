@@ -1,4 +1,5 @@
 // client/src/main.tsx or index.tsx
+import { Toaster } from 'sonner';
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
@@ -20,7 +21,12 @@ function GlobalFontSizeWrapper() {
     }
   }, [fontSize]);
 
-  return <App />;
+  return (
+    <>
+      <App />
+      <Toaster position="top-center" richColors />
+    </>
+  );
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
