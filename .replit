@@ -14,7 +14,6 @@ build = ["npm", "run", "build"]
 localPort = 5000
 
 [workflows]
-runButton = "Start Dev Server"
 
 [[workflows.workflow]]
 name = "Project"
@@ -42,6 +41,15 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run dev"
+
+[[workflows.workflow]]
+name = "Install sonner"
+mode = "sequential"
+author = 41927902
+
+[[workflows.workflow.tasks]]
+task = "packager.installForLanguage"
+args = "nodejs"
 
 [rules]
 
