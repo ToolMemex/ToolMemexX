@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
-import { Spinner } from "@/components/LoadingSpinner";
+import  Spinner  from "@/components/LoadingSpinner";
 import { showErrorToast } from "@/components/ui/toast";
 import { useMemeStore } from "@/stores/meme-store"; // Correct Zustand hook import
 
