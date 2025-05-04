@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "bash", "web"]
+modules = ["nodejs-20"]
 run = "npm run dev"
 hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
@@ -14,6 +14,7 @@ build = ["npm", "run", "build"]
 localPort = 5000
 
 [workflows]
+runButton = "Install sonner"
 
 [[workflows.workflow]]
 name = "Project"

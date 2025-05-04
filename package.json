@@ -9,7 +9,8 @@
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
     "db:push": "drizzle-kit push --force --config=./drizzle.config.ts",
-    "db:seed": "tsx db/seed.ts"
+    "db:seed": "tsx db/seed.ts",
+    "postinstall": "npm install sonner"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -75,6 +76,7 @@
     "react-resizable-panels": "^2.1.4",
     "react-router-dom": "^7.5.2",
     "recharts": "^2.13.0",
+    "sonner": "^2.0.3",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.0",
