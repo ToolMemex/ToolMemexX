@@ -70,4 +70,9 @@ else:
     print("Error from DeepSeek API:", response.text)
     return ""
 
-if name == "main": error_input = input("Paste the error message you want to fix: \n") fix_error(error_input)
+# === Static Error Message for Easy Paste ===
+error_input = """
+Paste your error message here between the triple quotes
+"""
+
+fix_error(error_input)
